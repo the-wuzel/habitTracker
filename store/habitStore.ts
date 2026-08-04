@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Habit, HabitLog, HabitLevel } from '../types/habit';
-import { getHabits, getHabitLogs, logHabit, initializeDatabase, seedDatabase } from '../db/database';
+import { getHabits, getHabitLogs, logHabit, initializeDatabase, addHabit, updateHabit, deleteHabit } from '../db/database';
 
 interface HabitState {
   habits: Habit[];
@@ -12,6 +12,9 @@ interface HabitState {
   init: () => void;
   setDate: (date: string) => void;
   logHabit: (habitId: string, level: HabitLevel, notes?: string) => void;
+  addHabit: (habit: Omit<Habit, 'id' | 'createdAt'>) => void;
+  updateHabit: (habit: Habit) => void;
+  deleteHabit: (id: string) => void;
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -23,7 +26,6 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   init: () => {
     try {
       initializeDatabase();
-      seedDatabase();
       
       const habits = getHabits();
       const todayLogs = getHabitLogs(get().currentDate);
@@ -60,6 +62,41 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({ todayLogs: updatedLogs });
     } catch (error) {
       console.error('Failed to log habit:', error);
+    }
+  },
+
+  addHabit: (habitData) => {
+    const newHabit: Habit = {
+      ...habitData,
+      id: Date.now().toString(),
+      createdAt: Date.now(),
+    };
+    try {
+      addHabit(newHabit);
+      set({ habits: getHabits() });
+    } catch (error) {
+      console.error('Failed to add habit:', error);
+    }
+  },
+
+  updateHabit: (habit) => {
+    try {
+      updateHabit(habit);
+      set({ habits: getHabits() });
+    } catch (error) {
+      console.error('Failed to update habit:', error);
+    }
+  },
+
+  deleteHabit: (id) => {
+    try {
+      deleteHabit(id);
+      // We also need to refresh logs in case logs were cascade deleted
+      const habits = getHabits();
+      const todayLogs = getHabitLogs(get().currentDate);
+      set({ habits, todayLogs });
+    } catch (error) {
+      console.error('Failed to delete habit:', error);
     }
   }
 }));

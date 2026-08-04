@@ -9,6 +9,7 @@ const md3Light = {
   surfaceVariant: '#E7E0EC',
   outline: '#79747E',
   text: '#1C1B1F', // md3 onSurface
+  error: '#B3261E',
 };
 
 const md3Dark = {
@@ -22,6 +23,7 @@ const md3Dark = {
   surfaceVariant: '#49454F',
   outline: '#938F99',
   text: '#E6E1E5', // md3 onSurface
+  error: '#F2B8B5',
 };
 
 export default {

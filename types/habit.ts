@@ -8,6 +8,9 @@ export interface Habit {
   id: string;
   name: string;
   description: string;
+  miniGoal: string;
+  plusGoal: string;
+  eliteGoal: string;
   createdAt: number;
 }
 

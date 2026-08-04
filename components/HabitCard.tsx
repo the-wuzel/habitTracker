@@ -25,35 +25,44 @@ export default function HabitCard({ habit, todayLog, onLogHabit }: HabitCardProp
           </View>
           
           <View style={styles.buttonRow}>
-            {todayLog?.level === HabitLevel.Mini ? (
-              <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Mini)}>
-                <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Mini</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Mini)}>
-                <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Mini</Text>
-              </TouchableOpacity>
-            )}
+            <View style={styles.buttonColumn}>
+              {todayLog?.level === HabitLevel.Mini ? (
+                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Mini)}>
+                  <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Mini</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Mini)}>
+                  <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Mini</Text>
+                </TouchableOpacity>
+              )}
+              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{habit.miniGoal}</Text>
+            </View>
             
-            {todayLog?.level === HabitLevel.Plus ? (
-              <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus)}>
-                <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Plus</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus)}>
-                <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Plus</Text>
-              </TouchableOpacity>
-            )}
+            <View style={styles.buttonColumn}>
+              {todayLog?.level === HabitLevel.Plus ? (
+                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus)}>
+                  <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Plus</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus)}>
+                  <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Plus</Text>
+                </TouchableOpacity>
+              )}
+              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{habit.plusGoal}</Text>
+            </View>
             
-            {todayLog?.level === HabitLevel.Elite ? (
-              <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite)}>
-                <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Elite</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite)}>
-                <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Elite</Text>
-              </TouchableOpacity>
-            )}
+            <View style={styles.buttonColumn}>
+              {todayLog?.level === HabitLevel.Elite ? (
+                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite)}>
+                  <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Elite</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite)}>
+                  <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Elite</Text>
+                </TouchableOpacity>
+              )}
+              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{habit.eliteGoal}</Text>
+            </View>
           </View>
           
           {isLogged && (
@@ -101,7 +110,17 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     marginTop: 24,
+    justifyContent: 'space-between',
     gap: 8,
+  },
+  buttonColumn: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  goalText: {
+    fontSize: 10,
+    textAlign: 'center',
   },
   logTextContainer: {
     marginTop: 16,

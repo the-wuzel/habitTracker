@@ -10,13 +10,21 @@ export const getDb = () => {
 export const initializeDatabase = () => {
   const db = getDb();
   
+  // For development/migration purposes, drop existing tables to apply schema change.
+  // In a production app, we would use proper migrations.
   db.execSync(`
+    DROP TABLE IF EXISTS habit_logs;
+    DROP TABLE IF EXISTS habits;
+  
     PRAGMA journal_mode = WAL;
     
     CREATE TABLE IF NOT EXISTS habits (
       id TEXT PRIMARY KEY NOT NULL,
       name TEXT NOT NULL,
       description TEXT NOT NULL,
+      miniGoal TEXT NOT NULL,
+      plusGoal TEXT NOT NULL,
+      eliteGoal TEXT NOT NULL,
       createdAt INTEGER NOT NULL
     );
 
@@ -26,37 +34,35 @@ export const initializeDatabase = () => {
       date TEXT NOT NULL,
       level TEXT NOT NULL,
       notes TEXT,
-      FOREIGN KEY(habitId) REFERENCES habits(id)
+      FOREIGN KEY(habitId) REFERENCES habits(id) ON DELETE CASCADE
     );
   `);
-};
-
-export const seedDatabase = () => {
-  const db = getDb();
-  
-  // Check if we already have habits
-  const result = db.getFirstSync<{ count: number }>('SELECT COUNT(*) as count FROM habits');
-  if (result && result.count === 0) {
-    console.log('Seeding database with initial habits...');
-    
-    const habits: Habit[] = [
-      { id: '1', name: 'Exercise', description: 'Daily physical activity', createdAt: Date.now() },
-      { id: '2', name: 'Read', description: 'Read a book', createdAt: Date.now() },
-      { id: '3', name: 'Meditate', description: 'Mindfulness practice', createdAt: Date.now() },
-    ];
-    
-    for (const habit of habits) {
-      db.runSync(
-        'INSERT INTO habits (id, name, description, createdAt) VALUES (?, ?, ?, ?)',
-        [habit.id, habit.name, habit.description, habit.createdAt]
-      );
-    }
-  }
 };
 
 export const getHabits = (): Habit[] => {
   const db = getDb();
   return db.getAllSync<Habit>('SELECT * FROM habits ORDER BY createdAt DESC');
+};
+
+export const addHabit = (habit: Habit) => {
+  const db = getDb();
+  db.runSync(
+    'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt]
+  );
+};
+
+export const updateHabit = (habit: Habit) => {
+  const db = getDb();
+  db.runSync(
+    'UPDATE habits SET name = ?, description = ?, miniGoal = ?, plusGoal = ?, eliteGoal = ? WHERE id = ?',
+    [habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.id]
+  );
+};
+
+export const deleteHabit = (id: string) => {
+  const db = getDb();
+  db.runSync('DELETE FROM habits WHERE id = ?', [id]);
 };
 
 export const getHabitLogs = (date: string): HabitLog[] => {

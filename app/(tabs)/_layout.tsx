@@ -1,35 +1,36 @@
-import { SymbolView } from 'expo-symbols';
 import { Link, Tabs } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Pressable } from 'react-native';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { useColorScheme } from '@/components/useColorScheme';
+import Colors from '@/constants/Colors';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? 'light';
+  const colors = Colors[colorScheme];
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-        tabBarInactiveTintColor: Colors[colorScheme].outline,
+        tabBarActiveTintColor: colors.tint,
+        tabBarInactiveTintColor: colors.outline,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme].surface,
+          backgroundColor: colors.surface,
           borderTopWidth: 0,
-          elevation: 8, // MD3 bottom navigation elevation
+          elevation: 8,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
         },
         headerStyle: {
-          backgroundColor: Colors[colorScheme].surface,
-          elevation: 0, // MD3 flat top app bar, shadow appears on scroll (simplification here)
+          backgroundColor: colors.surface,
+          elevation: 0,
           shadowOpacity: 0,
           borderBottomWidth: 0,
         },
         headerTitleStyle: {
-          color: Colors[colorScheme].text,
+          color: colors.text,
           fontSize: 22,
         },
         // Disable the static render of the header on web
@@ -39,22 +40,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
+          title: 'Track',
           tabBarIcon: ({ color }) => (
-            <SymbolView
-              name="chevron.left.forwardslash.chevron.right"
-              tintColor={color}
-              size={28}
-            />
+            <MaterialIcons name="check-circle" color={color} size={28} />
           ),
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable style={{ marginRight: 15 }}>
                 {({ pressed }) => (
-                  <SymbolView
-                    name="info.circle"
+                  <MaterialIcons
+                    name="info"
                     size={25}
-                    tintColor={Colors[colorScheme].text}
+                    color={colors.text}
                     style={{ opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
@@ -64,15 +61,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="manage"
         options={{
-          title: 'Tab Two',
+          title: 'Manage',
           tabBarIcon: ({ color }) => (
-            <SymbolView
-              name="chevron.left.forwardslash.chevron.right"
-              tintColor={color}
-              size={28}
-            />
+            <MaterialIcons name="format-list-bulleted" color={color} size={28} />
           ),
         }}
       />

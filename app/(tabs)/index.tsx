@@ -1,18 +1,31 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, ScrollView, ActivityIndicator, View, Text, useColorScheme } from 'react-native';
+import { StyleSheet, ScrollView, ActivityIndicator, View, Text, useColorScheme, TouchableOpacity } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import Colors from '../../constants/Colors';
 
 import HabitCard from '../../components/HabitCard';
 import { useHabitStore } from '../../store/habitStore';
 
 export default function TabOneScreen() {
-  const { habits, todayLogs, isLoading, init, logHabit } = useHabitStore();
+  const { habits, todayLogs, currentDate, isLoading, init, setDate, logHabit } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   useEffect(() => {
     init();
   }, [init]);
+
+  const handlePrevDay = () => {
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - 1);
+    setDate(date.toISOString().split('T')[0]);
+  };
+
+  const handleNextDay = () => {
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() + 1);
+    setDate(date.toISOString().split('T')[0]);
+  };
 
   if (isLoading) {
     return (
@@ -26,7 +39,13 @@ export default function TabOneScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={[styles.headerText, { color: colors.text }]}>Today's Habits</Text>
+          <TouchableOpacity onPress={handlePrevDay} style={styles.navButton}>
+            <MaterialIcons name="chevron-left" color={colors.primary} size={24} />
+          </TouchableOpacity>
+          <Text style={[styles.headerText, { color: colors.text }]}>{currentDate === new Date().toISOString().split('T')[0] ? "Today's Habits" : currentDate}</Text>
+          <TouchableOpacity onPress={handleNextDay} style={styles.navButton}>
+            <MaterialIcons name="chevron-right" color={colors.primary} size={24} />
+          </TouchableOpacity>
         </View>
         
         {habits.length === 0 ? (
@@ -63,6 +82,12 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  navButton: {
+    padding: 8,
   },
   headerText: {
     fontSize: 24, // MD3 Headline Small

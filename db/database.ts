@@ -1,21 +1,22 @@
 import * as SQLite from 'expo-sqlite';
-import { Habit, HabitLog, HabitLevel } from '../types/habit';
+import { Habit, HabitLog } from '../types/habit';
 
 const DB_NAME = 'elastic_habits.db';
 
+let dbInstance: SQLite.SQLiteDatabase | null = null;
+
 export const getDb = () => {
-  return SQLite.openDatabaseSync(DB_NAME);
+  if (!dbInstance) {
+    dbInstance = SQLite.openDatabaseSync(DB_NAME);
+  }
+  return dbInstance;
 };
 
 export const initializeDatabase = () => {
   const db = getDb();
   
-  // For development/migration purposes, drop existing tables to apply schema change.
-  // In a production app, we would use proper migrations.
+  // Creating tables if they don't exist
   db.execSync(`
-    DROP TABLE IF EXISTS habit_logs;
-    DROP TABLE IF EXISTS habits;
-  
     PRAGMA journal_mode = WAL;
     
     CREATE TABLE IF NOT EXISTS habits (
@@ -37,6 +38,50 @@ export const initializeDatabase = () => {
       FOREIGN KEY(habitId) REFERENCES habits(id) ON DELETE CASCADE
     );
   `);
+};
+
+export const seedDatabase = () => {
+  const db = getDb();
+  
+  const result = db.getFirstSync<{ count: number }>('SELECT COUNT(*) as count FROM habits');
+  if (result && result.count === 0) {
+    const habits: Habit[] = [
+      { 
+        id: '1', 
+        name: 'Exercise', 
+        description: 'Daily physical activity for health', 
+        miniGoal: '1 Pushup', 
+        plusGoal: '15 min Workout', 
+        eliteGoal: '45 min Gym', 
+        createdAt: Date.now() 
+      },
+      { 
+        id: '2', 
+        name: 'Read', 
+        description: 'Read a book to learn something new', 
+        miniGoal: '1 Page', 
+        plusGoal: '1 Chapter', 
+        eliteGoal: '50 Pages', 
+        createdAt: Date.now() - 1000 
+      },
+      { 
+        id: '3', 
+        name: 'Meditate', 
+        description: 'Mindfulness practice', 
+        miniGoal: '1 Deep Breath', 
+        plusGoal: '5 min Meditation', 
+        eliteGoal: '20 min Meditation', 
+        createdAt: Date.now() - 2000 
+      },
+    ];
+    
+    for (const habit of habits) {
+      db.runSync(
+        'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt]
+      );
+    }
+  }
 };
 
 export const getHabits = (): Habit[] => {
@@ -70,6 +115,11 @@ export const getHabitLogs = (date: string): HabitLog[] => {
   return db.getAllSync<HabitLog>('SELECT * FROM habit_logs WHERE date = ?', [date]);
 };
 
+export const getAllHabitLogs = (): HabitLog[] => {
+  const db = getDb();
+  return db.getAllSync<HabitLog>('SELECT * FROM habit_logs ORDER BY date ASC');
+};
+
 export const logHabit = (log: HabitLog) => {
   const db = getDb();
   
@@ -81,4 +131,9 @@ export const logHabit = (log: HabitLog) => {
     'INSERT INTO habit_logs (id, habitId, date, level, notes) VALUES (?, ?, ?, ?, ?)',
     [log.id, log.habitId, log.date, log.level, log.notes || '']
   );
+};
+
+export const removeHabitLog = (habitId: string, date: string) => {
+  const db = getDb();
+  db.runSync('DELETE FROM habit_logs WHERE habitId = ? AND date = ?', [habitId, date]);
 };

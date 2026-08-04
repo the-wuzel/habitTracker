@@ -3,40 +3,67 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, useCol
 import Colors from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Habit } from '../../types/habit';
 
 export default function ManageHabitsScreen() {
-  const { habits, addHabit, deleteHabit } = useHabitStore();
+  const { habits, addHabit, updateHabit, deleteHabit } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   const [isCreating, setIsCreating] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [miniGoal, setMiniGoal] = useState('');
   const [plusGoal, setPlusGoal] = useState('');
   const [eliteGoal, setEliteGoal] = useState('');
 
-  const handleCreate = () => {
+  const handleEdit = (habit: Habit) => {
+    setEditingHabit(habit);
+    setName(habit.name);
+    setDescription(habit.description);
+    setMiniGoal(habit.miniGoal);
+    setPlusGoal(habit.plusGoal);
+    setEliteGoal(habit.eliteGoal);
+    setIsCreating(true);
+  };
+
+  const handleSave = () => {
     if (!name.trim() || !miniGoal.trim() || !plusGoal.trim() || !eliteGoal.trim()) {
       Alert.alert('Validation', 'Please fill in all goal fields and the habit name.');
       return;
     }
     
-    addHabit({
-      name: name.trim(),
-      description: description.trim(),
-      miniGoal: miniGoal.trim(),
-      plusGoal: plusGoal.trim(),
-      eliteGoal: eliteGoal.trim()
-    });
+    if (editingHabit) {
+      updateHabit({
+        ...editingHabit,
+        name: name.trim(),
+        description: description.trim(),
+        miniGoal: miniGoal.trim(),
+        plusGoal: plusGoal.trim(),
+        eliteGoal: eliteGoal.trim()
+      });
+    } else {
+      addHabit({
+        name: name.trim(),
+        description: description.trim(),
+        miniGoal: miniGoal.trim(),
+        plusGoal: plusGoal.trim(),
+        eliteGoal: eliteGoal.trim()
+      });
+    }
 
-    // Reset form
+    handleCancel();
+  };
+
+  const handleCancel = () => {
     setName('');
     setDescription('');
     setMiniGoal('');
     setPlusGoal('');
     setEliteGoal('');
     setIsCreating(false);
+    setEditingHabit(null);
   };
 
   const handleDelete = (id: string) => {
@@ -55,7 +82,9 @@ export default function ManageHabitsScreen() {
 
         {isCreating ? (
           <View style={[styles.card, { backgroundColor: colors.surfaceVariant }]}>
-            <Text style={[styles.formTitle, { color: colors.text }]}>Create New Habit</Text>
+            <Text style={[styles.formTitle, { color: colors.text }]}>
+              {editingHabit ? 'Edit Habit' : 'Create New Habit'}
+            </Text>
             
             <TextInput
               style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
@@ -100,10 +129,10 @@ export default function ManageHabitsScreen() {
             />
 
             <View style={styles.formActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setIsCreating(false)}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
                 <Text style={{ color: colors.primary, fontWeight: '500' }}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.createBtn, { backgroundColor: colors.primary }]} onPress={handleCreate}>
+              <TouchableOpacity style={[styles.createBtn, { backgroundColor: colors.primary }]} onPress={handleSave}>
                 <Text style={{ color: colors.onPrimary, fontWeight: '500' }}>Save Habit</Text>
               </TouchableOpacity>
             </View>
@@ -121,9 +150,14 @@ export default function ManageHabitsScreen() {
                       M: {habit.miniGoal} | P: {habit.plusGoal} | E: {habit.eliteGoal}
                     </Text>
                   </View>
-                  <TouchableOpacity onPress={() => handleDelete(habit.id)} style={{ padding: 8 }}>
-                    <MaterialIcons name="delete" color={colors.error} size={24} />
-                  </TouchableOpacity>
+                  <View style={styles.habitItemActions}>
+                    <TouchableOpacity onPress={() => handleEdit(habit)} style={{ padding: 8 }}>
+                      <MaterialIcons name="edit" color={colors.primary} size={24} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDelete(habit.id)} style={{ padding: 8 }}>
+                      <MaterialIcons name="delete" color={colors.error} size={24} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               ))
             )}
@@ -218,6 +252,10 @@ const styles = StyleSheet.create({
   habitItemName: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  habitItemActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   fab: {
     position: 'absolute',

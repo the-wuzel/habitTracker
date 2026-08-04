@@ -7,7 +7,7 @@ import HabitCard from '../../components/HabitCard';
 import { useHabitStore } from '../../store/habitStore';
 
 export default function TabOneScreen() {
-  const { habits, todayLogs, currentDate, isLoading, init, setDate, logHabit } = useHabitStore();
+  const { habits, todayLogs, currentDate, isLoading, init, setDate, logHabit, removeLog } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
@@ -48,6 +48,15 @@ export default function TabOneScreen() {
           </TouchableOpacity>
         </View>
         
+        {currentDate.endsWith('-31') && (
+          <View style={[styles.freeDayBanner, { backgroundColor: 'rgba(0, 150, 136, 0.1)', borderColor: colors.primary }]}>
+            <MaterialIcons name="celebration" size={24} color={colors.primary} />
+            <Text style={[styles.freeDayText, { color: colors.primary }]}>
+              Today is a Free Day! You don't need to track anything.
+            </Text>
+          </View>
+        )}
+        
         {habits.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={{ fontSize: 16, color: colors.secondary }}>
@@ -63,6 +72,7 @@ export default function TabOneScreen() {
                 habit={habit}
                 todayLog={todayLog}
                 onLogHabit={logHabit}
+                onRemoveLog={removeLog}
               />
             );
           })
@@ -97,6 +107,21 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 16,
     alignItems: 'center',
+  },
+  freeDayBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  freeDayText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 12,
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,

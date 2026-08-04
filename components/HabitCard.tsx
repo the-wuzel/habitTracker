@@ -7,9 +7,10 @@ interface HabitCardProps {
   habit: Habit;
   todayLog?: HabitLog;
   onLogHabit: (habitId: string, level: HabitLevel) => void;
+  onRemoveLog: (habitId: string) => void;
 }
 
-export default function HabitCard({ habit, todayLog, onLogHabit }: HabitCardProps) {
+export default function HabitCard({ habit, todayLog, onLogHabit, onRemoveLog }: HabitCardProps) {
   const isLogged = !!todayLog;
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
@@ -27,7 +28,7 @@ export default function HabitCard({ habit, todayLog, onLogHabit }: HabitCardProp
           <View style={styles.buttonRow}>
             <View style={styles.buttonColumn}>
               {todayLog?.level === HabitLevel.Mini ? (
-                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Mini)}>
+                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onRemoveLog(habit.id)}>
                   <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Mini</Text>
                 </TouchableOpacity>
               ) : (
@@ -40,7 +41,7 @@ export default function HabitCard({ habit, todayLog, onLogHabit }: HabitCardProp
             
             <View style={styles.buttonColumn}>
               {todayLog?.level === HabitLevel.Plus ? (
-                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus)}>
+                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onRemoveLog(habit.id)}>
                   <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Plus</Text>
                 </TouchableOpacity>
               ) : (
@@ -53,7 +54,7 @@ export default function HabitCard({ habit, todayLog, onLogHabit }: HabitCardProp
             
             <View style={styles.buttonColumn}>
               {todayLog?.level === HabitLevel.Elite ? (
-                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite)}>
+                <TouchableOpacity style={[styles.buttonActive, { backgroundColor: colors.primaryContainer }]} onPress={() => onRemoveLog(habit.id)}>
                   <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Elite</Text>
                 </TouchableOpacity>
               ) : (

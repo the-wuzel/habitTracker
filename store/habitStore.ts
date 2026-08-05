@@ -9,9 +9,11 @@ interface HabitState {
   isLoading: boolean;
   allLogs: HabitLog[];
   enableLateralFlexibility: boolean;
+  hasCompletedOnboarding: boolean;
   
   // Actions
   init: () => void;
+  completeOnboarding: () => void;
   setDate: (date: string) => void;
   fetchAllLogs: () => void;
   logHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => void;
@@ -30,6 +32,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   currentDate: new Date().toISOString().split('T')[0],
   isLoading: true,
   enableLateralFlexibility: true,
+  hasCompletedOnboarding: true, // Will be overridden in init
   
   init: () => {
     try {
@@ -40,8 +43,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const todayLogs = getHabitLogs(get().currentDate);
       const allLogs = getAllHabitLogs();
       const enableLateralFlexibility = getSetting('enableLateralFlexibility', 'true') === 'true';
+      const hasCompletedOnboarding = getSetting('hasCompletedOnboarding', 'false') === 'true';
       
-      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility });
+      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility, hasCompletedOnboarding });
     } catch (error) {
       console.error('Failed to initialize database:', error);
       set({ isLoading: false });
@@ -231,6 +235,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({ enableLateralFlexibility: newValue });
     } catch (error) {
       console.error('Failed to toggle lateral flexibility setting:', error);
+    }
+  },
+  
+  completeOnboarding: () => {
+    try {
+      setSetting('hasCompletedOnboarding', 'true');
+      set({ hasCompletedOnboarding: true });
+    } catch (error) {
+      console.error('Failed to save onboarding state:', error);
     }
   }
 }));

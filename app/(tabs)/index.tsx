@@ -8,6 +8,7 @@ import HabitCard from '../../components/HabitCard';
 import { useHabitStore } from '../../store/habitStore';
 import { HabitLevel, HabitLog } from '../../types/habit';
 import { calculatePeriodStats, calculateStreak } from '../../utils/score';
+import { Redirect } from 'expo-router';
 
 const formatHeaderDate = (dateString: string) => {
   const today = new Date().toISOString().split('T')[0];
@@ -36,7 +37,7 @@ const formatHeaderDate = (dateString: string) => {
 };
 
 export default function TabOneScreen() {
-  const { habits, todayLogs, currentDate, isLoading, init, setDate, logHabit, removeLog, allLogs } = useHabitStore();
+  const { habits, todayLogs, currentDate, isLoading, hasCompletedOnboarding, init, setDate, logHabit, removeLog, allLogs } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   const [isSimplifiedView, setIsSimplifiedView] = useState(false);
@@ -128,6 +129,10 @@ export default function TabOneScreen() {
         <ActivityIndicator size="large" />
       </View>
     );
+  }
+
+  if (!hasCompletedOnboarding) {
+    return <Redirect href="/onboarding" />;
   }
 
   return (

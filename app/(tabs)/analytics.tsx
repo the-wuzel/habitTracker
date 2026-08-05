@@ -135,14 +135,14 @@ export default function AnalyticsScreen() {
       </View>
 
       {/* Total Score Card */}
-      <View style={[styles.scoreCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+      <View style={[styles.scoreCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
         <MaterialIcons name="emoji-events" size={48} color={colors.primary} />
         <Text style={styles.scoreTitle}>Total Elastic Score</Text>
         <Text style={[styles.scoreValue, { color: colors.primary }]}>{totalScore}</Text>
         <Text style={[styles.scoreSubtitle, { color: colors.text }]}>Points earned across all habits</Text>
       </View>
 
-      <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+      <View style={[styles.infoCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
         <View style={styles.infoHeader}>
           <MaterialIcons name="info-outline" size={20} color={colors.primary} />
           <Text style={styles.infoTitle}>How Points Work</Text>
@@ -195,7 +195,7 @@ export default function AnalyticsScreen() {
       )}
 
       {habitStats.length > 0 && periodProgress.length > 0 && (
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
           
           <View style={{ gap: 8 }}>
             {periodProgress.map((pp, index) => (

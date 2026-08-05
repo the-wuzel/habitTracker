@@ -10,6 +10,7 @@ interface HabitState {
   allLogs: HabitLog[];
   enableLateralFlexibility: boolean;
   hasCompletedOnboarding: boolean;
+  themeMode: 'system' | 'light' | 'dark';
   
   // Actions
   init: () => void;
@@ -23,6 +24,7 @@ interface HabitState {
   deleteHabit: (id: string) => void;
   loadMockData: () => void;
   toggleLateralFlexibility: () => void;
+  setThemeMode: (mode: 'system' | 'light' | 'dark') => void;
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -33,6 +35,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   isLoading: true,
   enableLateralFlexibility: true,
   hasCompletedOnboarding: true, // Will be overridden in init
+  themeMode: 'system',
   
   init: () => {
     try {
@@ -44,8 +47,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const allLogs = getAllHabitLogs();
       const enableLateralFlexibility = getSetting('enableLateralFlexibility', 'true') === 'true';
       const hasCompletedOnboarding = getSetting('hasCompletedOnboarding', 'false') === 'true';
+      const themeMode = getSetting('themeMode', 'system') as 'system' | 'light' | 'dark';
       
-      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility, hasCompletedOnboarding });
+      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility, hasCompletedOnboarding, themeMode });
     } catch (error) {
       console.error('Failed to initialize database:', error);
       set({ isLoading: false });
@@ -244,6 +248,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({ hasCompletedOnboarding: true });
     } catch (error) {
       console.error('Failed to save onboarding state:', error);
+    }
+  },
+  
+  setThemeMode: (mode: 'system' | 'light' | 'dark') => {
+    try {
+      setSetting('themeMode', mode);
+      set({ themeMode: mode });
+    } catch (error) {
+      console.error('Failed to save theme mode:', error);
     }
   }
 }));

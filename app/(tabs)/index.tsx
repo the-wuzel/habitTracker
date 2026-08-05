@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Colors from '../../constants/Colors';
 
 import BonusOverlay from '../../components/BonusOverlay';
@@ -9,6 +9,7 @@ import { useHabitStore } from '../../store/habitStore';
 import { HabitLevel, HabitLog } from '../../types/habit';
 import { calculatePeriodStats, calculateStreak } from '../../utils/score';
 import { Redirect } from 'expo-router';
+import { useColorScheme } from '../../components/useColorScheme';
 
 const formatHeaderDate = (dateString: string) => {
   const today = new Date().toISOString().split('T')[0];
@@ -161,7 +162,7 @@ export default function TabOneScreen() {
         </View>
 
         {!isSimplifiedView && (
-          <View style={[styles.compactScoreCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+          <View style={[styles.compactScoreCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
             <MaterialIcons name="emoji-events" size={24} color={colors.primary} />
             <Text style={[styles.compactScoreText, { color: colors.text }]}>Total Elastic Score:</Text>
             <Text style={[styles.compactScoreValue, { color: colors.primary }]}>{periodScore}</Text>
@@ -169,7 +170,7 @@ export default function TabOneScreen() {
         )}
         
         {currentDate.endsWith('-31') && (
-          <View style={[styles.freeDayBanner, { backgroundColor: 'rgba(0, 150, 136, 0.1)', borderColor: colors.primary }]}>
+          <View style={[styles.freeDayBanner, { backgroundColor: 'rgba(0, 150, 136, 0.1)', borderColor: 'transparent' }]}>
             <MaterialIcons name="celebration" size={24} color={colors.primary} />
             <Text style={[styles.freeDayText, { color: colors.primary }]}>
               Today is a Free Day! You don't need to track anything.

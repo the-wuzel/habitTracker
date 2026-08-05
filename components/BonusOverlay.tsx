@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, Animated, useColorScheme, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Animated, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
+import { useColorScheme } from './useColorScheme';
 
 interface Props {
   bonuses: { title: string, description: string }[];

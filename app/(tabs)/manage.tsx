@@ -1,15 +1,28 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View, Platform, Switch, Modal } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, Switch, Modal } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Colors from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';
 import { Habit, HabitOption } from '../../types/habit';
+import { useColorScheme } from '../../components/useColorScheme';
 
 export default function ManageHabitsScreen() {
-  const { habits, addHabit, updateHabit, deleteHabit, loadMockData, enableLateralFlexibility, toggleLateralFlexibility } = useHabitStore();
+  const { habits, addHabit, updateHabit, deleteHabit, loadMockData, enableLateralFlexibility, toggleLateralFlexibility, themeMode, setThemeMode } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+
+  const cycleTheme = () => {
+    if (themeMode === 'system') setThemeMode('light');
+    else if (themeMode === 'light') setThemeMode('dark');
+    else setThemeMode('system');
+  };
+
+  const getThemeIcon = () => {
+    if (themeMode === 'light') return 'light-mode';
+    if (themeMode === 'dark') return 'dark-mode';
+    return 'brightness-auto';
+  };
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
@@ -172,6 +185,12 @@ export default function ManageHabitsScreen() {
               />
             </View>
             <TouchableOpacity 
+              style={{ padding: 6, backgroundColor: colors.surfaceVariant, borderRadius: 20 }}
+              onPress={cycleTheme}
+            >
+              <MaterialIcons name={getThemeIcon() as any} size={20} color={colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity 
               style={[styles.mockBtn, { backgroundColor: colors.primaryContainer }]} 
               onPress={() => {
                 Alert.alert('Load Mock Data', 'This will delete all current habits and logs. Are you sure?', [
@@ -186,7 +205,7 @@ export default function ManageHabitsScreen() {
         </View>
 
         {isCreating ? (
-          <View style={[styles.card, { backgroundColor: colors.surfaceVariant }]}>
+          <View style={[styles.card, { backgroundColor: colors.elevation.level1 }]}>
             <Text style={[styles.formTitle, { color: colors.text }]}>
               {editingHabit ? 'Edit Habit' : 'Create New Habit'}
             </Text>
@@ -292,7 +311,7 @@ export default function ManageHabitsScreen() {
               habits.map(habit => {
                 const displayOpt = habit.options && habit.options.length > 0 ? habit.options[0] : habit;
                 return (
-                  <View key={habit.id} style={[styles.habitItem, { backgroundColor: colors.surfaceVariant }]}>
+                  <View key={habit.id} style={[styles.habitItem, { backgroundColor: colors.elevation.level1 }]}>
                     <View style={styles.habitItemInfo}>
                       <Text style={[styles.habitItemName, { color: colors.text }]}>{habit.name}</Text>
                       {enableLateralFlexibility && habit.options && habit.options.length > 1 ? (

@@ -189,6 +189,34 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         addHabit(habit);
       }
       
+      const mockLogs: HabitLog[] = [];
+      const now = new Date(get().currentDate);
+      for (let i = 14; i >= 0; i--) {
+        const past = new Date(now);
+        past.setDate(now.getDate() - i);
+        const dateStr = past.toISOString().split('T')[0];
+        const index = 14 - i;
+        
+        // Habit 1: 15 days streak. First 10 days are Elite. Remaining 5 days are Mini.
+        // This hits Habit Master (15 streak), Hot Streak (3 & 7 elite), Specialist (10 elite).
+        const h1Level = index < 10 ? HabitLevel.Elite : HabitLevel.Mini;
+        mockLogs.push({ id: `mock-1-${index}`, habitId: '1', date: dateStr, level: h1Level, notes: 'Mocked', optionId: '1-1' });
+
+        // Habit 2: First 5 days Elite. This helps hit Big Hitter (total 15 elite across habits)
+        if (index < 5) {
+          mockLogs.push({ id: `mock-2-${index}`, habitId: '2', date: dateStr, level: HabitLevel.Elite, notes: 'Mocked', optionId: '2-1' });
+        }
+
+        // Habit 3: Day 0 Elite. This hits Perfect Day (all habits elite on same day)
+        if (index === 0) {
+          mockLogs.push({ id: `mock-3-${index}`, habitId: '3', date: dateStr, level: HabitLevel.Elite, notes: 'Mocked', optionId: '3-1' });
+        }
+      }
+
+      for (const log of mockLogs) {
+        logHabit(log);
+      }
+      
       set({ habits: getHabits(), todayLogs: getHabitLogs(get().currentDate), allLogs: getAllHabitLogs() });
     } catch (error) {
       console.error('Failed to load mock data:', error);

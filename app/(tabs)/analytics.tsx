@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/Themed';
-import { useHabitStore } from '@/store/habitStore';
-import { HabitLevel, HabitLog, Habit } from '@/types/habit';
-import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
-import { MaterialIcons } from '@expo/vector-icons';
+import Colors from '@/constants/Colors';
+import { useHabitStore } from '@/store/habitStore';
+import { HabitLevel } from '@/types/habit';
 import { calculatePeriodStats } from '@/utils/score';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 
 
@@ -32,12 +32,13 @@ export default function AnalyticsScreen() {
     const dateObj = new Date(`${year}-${month}-01T00:00:00Z`);
     const monthName = dateObj.toLocaleString('default', { month: 'long', timeZone: 'UTC' });
 
-    let endDay = isFirstHalf ? '15' : '30';
+    const lastDayOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0)).getUTCDate();
+    let endDay = isFirstHalf ? '15' : lastDayOfMonth.toString();
     
     return {
       periodStart: viewedPeriodStart,
       periodEnd: `${year}-${month}-${endDay}`,
-      periodLabel: `${monthName} ${isFirstHalf ? '1-15' : '16-30'}, ${year}`
+      periodLabel: `${monthName} ${isFirstHalf ? '1-15' : `16-${lastDayOfMonth}`}, ${year}`
     };
   }, [viewedPeriodStart]);
 
@@ -78,6 +79,39 @@ export default function AnalyticsScreen() {
     const periodLogs = allLogs.filter(l => l.date >= periodStart && l.date <= periodEnd);
     return calculatePeriodStats(habits, periodLogs, currentDate, periodEnd);
   }, [habits, allLogs, currentDate, periodStart, periodEnd]);
+
+  const periodProgress = useMemo(() => {
+    const days: string[] = [];
+    const [year, month, startDay] = periodStart.split('-');
+    const endDay = parseInt(periodEnd.split('-')[2]);
+    for (let d = parseInt(startDay); d <= endDay; d++) {
+      days.push(`${year}-${month}-${d.toString().padStart(2, '0')}`);
+    }
+    
+    return habits.map(habit => {
+      let miniCount = 0;
+      let plusCount = 0;
+      let eliteCount = 0;
+      let totalCount = 0;
+      
+      const progress = days.map(day => {
+        const log = allLogs.find(l => l.habitId === habit.id && l.date === day);
+        if (log) {
+          if (log.level === HabitLevel.Mini) miniCount++;
+          if (log.level === HabitLevel.Plus) plusCount++;
+          if (log.level === HabitLevel.Elite) eliteCount++;
+          totalCount++;
+        }
+        return { date: day, level: log?.level || null };
+      });
+      
+      return {
+        habit,
+        progress,
+        counts: { mini: miniCount, plus: plusCount, elite: eliteCount, total: totalCount }
+      };
+    });
+  }, [periodStart, periodEnd, habits, allLogs]);
 
   return (
     <ScrollView 
@@ -180,6 +214,76 @@ export default function AnalyticsScreen() {
           </View>
         </View>
       ))}
+
+      {habitStats.length > 0 && (
+        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Period Progress</Text>
+      )}
+
+      {habitStats.length > 0 && periodProgress.length > 0 && (
+        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+          
+          <View style={{ gap: 8 }}>
+            {periodProgress.map((pp, index) => (
+              <View key={`grid-${index}`} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ fontSize: 11, fontWeight: '600', width: 65, marginRight: 8, color: colors.text }} numberOfLines={1}>
+                  {pp.habit.name}
+                </Text>
+                <View style={[styles.progressRow, { paddingBottom: 0, flex: 1 }]}>
+                  {pp.progress.map((day, idx) => {
+                    let initial = '';
+                    let bgColor = 'transparent';
+                    let textColor = colors.outline;
+                    let borderColor = colors.outline;
+
+                    if (day.level === HabitLevel.Mini) {
+                      initial = 'M'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                    } else if (day.level === HabitLevel.Plus) {
+                      initial = 'P'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                    } else if (day.level === HabitLevel.Elite) {
+                      initial = 'E'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                    }
+                    
+                    return (
+                      <View key={idx} style={[styles.historyCircle, { backgroundColor: bgColor, borderColor }]}>
+                        <Text style={[styles.historyText, { color: textColor }]}>{initial}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={{ marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)', gap: 8 }}>
+            {periodProgress.map((pp, index) => (
+              <View key={`counts-${index}`} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ fontSize: 11, fontWeight: '600', width: 65, marginRight: 8, color: colors.text }} numberOfLines={1}>
+                  {pp.habit.name}
+                </Text>
+                <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
+                  <Text style={[styles.countText, { color: colors.text }]}>M:{pp.counts.mini}</Text>
+                  <Text style={[styles.countText, { color: colors.text }]}>P:{pp.counts.plus}</Text>
+                  <Text style={[styles.countText, { color: colors.text }]}>E:{pp.counts.elite}</Text>
+                  <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Tot:{pp.counts.total}</Text>
+                </View>
+              </View>
+            ))}
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)' }}>
+              <Text style={{ fontSize: 12, fontWeight: 'bold', width: 65, marginRight: 8, color: colors.primary }}>
+                Total
+              </Text>
+              <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>M:{periodProgress.reduce((sum, pp) => sum + pp.counts.mini, 0)}</Text>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>P:{periodProgress.reduce((sum, pp) => sum + pp.counts.plus, 0)}</Text>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>E:{periodProgress.reduce((sum, pp) => sum + pp.counts.elite, 0)}</Text>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Tot:{periodProgress.reduce((sum, pp) => sum + pp.counts.total, 0)}</Text>
+              </View>
+            </View>
+          </View>
+
+        </View>
+      )}
 
       {habitStats.length === 0 && (
         <View style={styles.emptyContainer}>
@@ -338,5 +442,32 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 16,
+  },
+  historyCircle: {
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  historyText: {
+    fontSize: 8,
+    fontWeight: 'bold',
+  },
+  countsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  countText: {
+    fontSize: 12,
   }
 });

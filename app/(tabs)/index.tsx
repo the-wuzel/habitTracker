@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, ScrollView, ActivityIndicator, View, Text, useColorScheme, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import Colors from '../../constants/Colors';
 
+import BonusOverlay from '../../components/BonusOverlay';
 import HabitCard from '../../components/HabitCard';
 import { useHabitStore } from '../../store/habitStore';
+import { HabitLevel, HabitLog } from '../../types/habit';
 import { calculatePeriodStats, calculateStreak } from '../../utils/score';
 
 const formatHeaderDate = (dateString: string) => {
@@ -38,6 +40,7 @@ export default function TabOneScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   const [isSimplifiedView, setIsSimplifiedView] = useState(false);
+  const [recentBonuses, setRecentBonuses] = useState<{title: string, description: string}[]>([]);
 
   useEffect(() => {
     init();
@@ -75,6 +78,48 @@ export default function TabOneScreen() {
     setDate(new Date().toISOString().split('T')[0]);
   };
 
+  const handleLogHabit = (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => {
+    const [year, month, day] = currentDate.split('-');
+    const isFirstHalf = parseInt(day) <= 15;
+    const periodStart = `${year}-${month}-01`;
+    const endDay = isFirstHalf ? '15' : '30';
+    const periodEnd = `${year}-${month}-${endDay}`;
+    const periodLogsBefore = allLogs.filter(l => l.date >= periodStart && l.date <= periodEnd);
+    
+    const statsBefore = calculatePeriodStats(habits, periodLogsBefore, currentDate, periodEnd);
+    
+    // Perform log
+    logHabit(habitId, level, notes, optionId);
+    
+    // Simulate what the stats are after log
+    const newLog: HabitLog = {
+      id: 'temp',
+      habitId,
+      date: currentDate,
+      level,
+      notes,
+      optionId,
+    };
+    
+    const periodLogsAfter = [
+      ...periodLogsBefore.filter(l => !(l.habitId === habitId && l.date === currentDate)), 
+      newLog
+    ];
+    const statsAfter = calculatePeriodStats(habits, periodLogsAfter, currentDate, periodEnd);
+    
+    const newlyAchieved: {title: string, description: string}[] = [];
+    if (statsAfter.bonusCounts.specialist > statsBefore.bonusCounts.specialist) newlyAchieved.push({ title: 'Specialist', description: '10 Elite wins for one habit' });
+    if (statsAfter.bonusCounts.hotStreak3 > statsBefore.bonusCounts.hotStreak3) newlyAchieved.push({ title: 'Hot Streak', description: '3 consecutive Elite wins' });
+    if (statsAfter.bonusCounts.hotStreak7 > statsBefore.bonusCounts.hotStreak7) newlyAchieved.push({ title: 'Unfreakinbelievable', description: '7 consecutive Elite wins' });
+    if (statsAfter.bonusCounts.habitMaster > statsBefore.bonusCounts.habitMaster) newlyAchieved.push({ title: 'Habit Master', description: '15-day streak (Consistency!)' });
+    if (statsAfter.bonusCounts.bigHitter > statsBefore.bonusCounts.bigHitter) newlyAchieved.push({ title: 'Big Hitter', description: '15 Elite wins across habits' });
+    if (statsAfter.bonusCounts.perfectDay > statsBefore.bonusCounts.perfectDay) newlyAchieved.push({ title: 'Perfect Day', description: 'Elite win for all habits' });
+
+    if (newlyAchieved.length > 0) {
+      setRecentBonuses(newlyAchieved);
+    }
+  };
+
   const isToday = currentDate === new Date().toISOString().split('T')[0];
 
   if (isLoading) {
@@ -87,6 +132,8 @@ export default function TabOneScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <BonusOverlay bonuses={recentBonuses} onDismiss={() => setRecentBonuses([])} />
+      
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={handlePrevDay} style={styles.navButton}>
@@ -150,13 +197,13 @@ export default function TabOneScreen() {
             }
 
             return (
-              <HabitCard
+               <HabitCard
                 key={habit.id}
                 habit={habit}
                 todayLog={todayLog}
                 streak={isSimplifiedView ? 0 : streak}
                 last7Days={isSimplifiedView ? [] : last7Days}
-                onLogHabit={logHabit}
+                onLogHabit={handleLogHabit}
                 onRemoveLog={removeLog}
               />
             );

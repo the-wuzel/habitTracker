@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ScrollView } from 'react-native';
-import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';
-import Colors from '../constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import Colors from '../constants/Colors';
 import { useHabitStore } from '../store/habitStore';
+import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';
 
 interface HabitCardProps {
   habit: Habit;
@@ -129,14 +129,6 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
             </View>
           </View>
-          
-          {isLogged && (
-            <View style={styles.logTextContainer}>
-              <Text style={[styles.logText, { color: colors.secondary }]}>
-                Logged today as {todayLog.level} {todayLog.optionId && hasOptions ? `(${habit.options?.find(o => o.id === todayLog.optionId)?.name})` : ''}
-              </Text>
-            </View>
-          )}
           
           {last7Days.length > 0 && (
             <View style={styles.historyContainer}>

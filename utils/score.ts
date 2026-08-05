@@ -41,6 +41,15 @@ export const calculateStreak = (logs: HabitLog[], todayStr: string) => {
 export const calculatePeriodStats = (habits: Habit[], periodLogs: HabitLog[], currentDateStr: string, periodEndStr: string) => {
   let score = 0;
   const stats: Record<string, { points: number, streak: number, name: string }> = {};
+  
+  const bonusCounts = {
+    specialist: 0,
+    hotStreak3: 0,
+    hotStreak7: 0,
+    habitMaster: 0,
+    bigHitter: 0,
+    perfectDay: 0,
+  };
 
   habits.forEach(h => {
     stats[h.id] = { points: 0, streak: 0, name: h.name };
@@ -82,12 +91,24 @@ export const calculatePeriodStats = (habits: Habit[], periodLogs: HabitLog[], cu
       
       if (log.level === HabitLevel.Elite) {
         habitEliteCount++;
-        if (habitEliteCount % 10 === 0) habitPoints += 3; // Specialist
+        if (habitEliteCount % 10 === 0) {
+          habitPoints += 3; // Specialist
+          bonusCounts.specialist++;
+        }
       }
 
-      if (eliteStreak === 3) habitPoints += 3;
-      if (eliteStreak === 7) habitPoints += 5;
-      if (overallStreak > 0 && overallStreak % 15 === 0) habitPoints += 20; // Habit Master
+      if (eliteStreak === 3) {
+        habitPoints += 3;
+        bonusCounts.hotStreak3++;
+      }
+      if (eliteStreak === 7) {
+        habitPoints += 5;
+        bonusCounts.hotStreak7++;
+      }
+      if (overallStreak > 0 && overallStreak % 15 === 0) {
+        habitPoints += 20; // Habit Master
+        bonusCounts.habitMaster++;
+      }
     });
 
     stats[h.id].points = habitPoints;
@@ -99,7 +120,9 @@ export const calculatePeriodStats = (habits: Habit[], periodLogs: HabitLog[], cu
   });
 
   const totalEliteWins = periodLogs.filter(l => l.level === HabitLevel.Elite).length;
-  score += Math.floor(totalEliteWins / 15) * 3; // Big Hitter
+  const bigHitters = Math.floor(totalEliteWins / 15);
+  score += bigHitters * 3; // Big Hitter
+  bonusCounts.bigHitter = bigHitters;
 
   if (habits.length > 0) {
     const uniqueDates = [...new Set(periodLogs.map(l => l.date))];
@@ -107,9 +130,10 @@ export const calculatePeriodStats = (habits: Habit[], periodLogs: HabitLog[], cu
       const eliteLogsForDate = periodLogs.filter(l => l.date === date && l.level === HabitLevel.Elite);
       if (eliteLogsForDate.length === habits.length) {
         score += 2;
+        bonusCounts.perfectDay++;
       }
     });
   }
 
-  return { totalScore: score, habitStats: Object.values(stats) };
+  return { totalScore: score, habitStats: Object.values(stats), bonusCounts };
 };

@@ -234,7 +234,7 @@ export default function AnalyticsScreen() {
             ))}
           </View>
 
-          <View style={{ marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)' }}>
+          <View style={{ marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.outlineVariant }}>
             {periodProgress.map((pp, index) => {
               const stat = habitStats.find(s => s.name === pp.habit.name);
               return (
@@ -266,7 +266,7 @@ export default function AnalyticsScreen() {
               );
             })}
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.outlineVariant }}>
               <Text style={{ fontSize: 12, fontWeight: 'bold', width: 65, marginRight: 8, color: colors.primary }}>
                 Total
               </Text>
@@ -462,7 +462,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
   },
   countText: {
     fontSize: 12,

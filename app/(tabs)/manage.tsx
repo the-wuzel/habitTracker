@@ -243,7 +243,7 @@ export default function ManageHabitsScreen() {
               return (
               <View key={option.id} style={enableLateralFlexibility ? [styles.optionContainer, { borderColor: colors.outline, backgroundColor: colors.surface }] : { marginTop: 16 }}>
                 {enableLateralFlexibility && (
-                  <View style={styles.optionHeader}>
+                  <View style={[styles.optionHeader, { borderBottomColor: colors.outlineVariant }]}>
                     <TextInput
                       style={[styles.optionNameInput, { color: colors.text }]}
                       value={option.name}
@@ -437,7 +437,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
     paddingBottom: 8,
     marginBottom: 8,
   },

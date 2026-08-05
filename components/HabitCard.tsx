@@ -132,7 +132,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
           </View>
           
           {last7Days.length > 0 && (
-            <View style={styles.historyContainer}>
+            <View style={[styles.historyContainer, { borderTopColor: colors.outlineVariant }]}>
               {last7Days.map((day, idx) => {
                 let initial = '';
                 let bgColor = 'transparent';
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
   },
   historyCircle: {
     width: 28,

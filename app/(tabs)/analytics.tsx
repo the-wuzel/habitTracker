@@ -190,33 +190,8 @@ export default function AnalyticsScreen() {
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Habit Breakdown</Text>
-
-      {/* Habit Stats List */}
-      {habitStats.map((stat, index) => (
-        <View key={index} style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
-          <View style={styles.statHeader}>
-            <Text style={styles.statName}>{stat.name}</Text>
-            <View style={styles.pointsBadge}>
-              <Text style={styles.pointsText}>{stat.points} pts</Text>
-            </View>
-          </View>
-          
-          <View style={styles.streakContainer}>
-            <MaterialIcons 
-              name="local-fire-department" 
-              size={24} 
-              color={stat.streak > 0 ? '#FF9800' : colors.outline} 
-            />
-            <Text style={[styles.streakText, { color: stat.streak > 0 ? '#FF9800' : colors.outline }]}>
-              {stat.streak} {stat.streak === 1 ? 'Day' : 'Days'} Streak
-            </Text>
-          </View>
-        </View>
-      ))}
-
-      {habitStats.length > 0 && (
-        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Period Progress</Text>
+      {habitStats.length > 0 && periodProgress.length > 0 && (
+        <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Breakdown & Progress</Text>
       )}
 
       {habitStats.length > 0 && periodProgress.length > 0 && (
@@ -254,20 +229,37 @@ export default function AnalyticsScreen() {
             ))}
           </View>
 
-          <View style={{ marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)', gap: 8 }}>
-            {periodProgress.map((pp, index) => (
-              <View key={`counts-${index}`} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 11, fontWeight: '600', width: 65, marginRight: 8, color: colors.text }} numberOfLines={1}>
-                  {pp.habit.name}
-                </Text>
-                <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
-                  <Text style={[styles.countText, { color: colors.text }]}>M:{pp.counts.mini}</Text>
-                  <Text style={[styles.countText, { color: colors.text }]}>P:{pp.counts.plus}</Text>
-                  <Text style={[styles.countText, { color: colors.text }]}>E:{pp.counts.elite}</Text>
-                  <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Tot:{pp.counts.total}</Text>
+          <View style={{ marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)' }}>
+            {periodProgress.map((pp, index) => {
+              const stat = habitStats.find(s => s.name === pp.habit.name);
+              return (
+                <View key={`counts-${index}`} style={{ flexDirection: 'column', gap: 6, marginBottom: index === periodProgress.length - 1 ? 0 : 16 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13, fontWeight: 'bold', color: colors.text, flex: 1 }} numberOfLines={1}>
+                      {pp.habit.name}
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                       <View style={styles.streakContainer}>
+                         <MaterialIcons name="local-fire-department" size={16} color={stat?.streak && stat.streak > 0 ? '#FF9800' : colors.outline} />
+                         <Text style={{ fontSize: 12, fontWeight: '600', color: stat?.streak && stat.streak > 0 ? '#FF9800' : colors.outline, marginLeft: 4 }}>
+                           {stat?.streak || 0} {stat?.streak === 1 ? 'Day' : 'Days'}
+                         </Text>
+                       </View>
+                       <View style={[styles.pointsBadge, { paddingVertical: 2, paddingHorizontal: 8 }]}>
+                         <Text style={{ color: '#009688', fontWeight: 'bold', fontSize: 12 }}>{stat?.points || 0} pts</Text>
+                       </View>
+                    </View>
+                  </View>
+                  
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={[styles.countText, { color: colors.text }]}>M:{pp.counts.mini}</Text>
+                    <Text style={[styles.countText, { color: colors.text }]}>P:{pp.counts.plus}</Text>
+                    <Text style={[styles.countText, { color: colors.text }]}>E:{pp.counts.elite}</Text>
+                    <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Tot:{pp.counts.total}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
 
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)' }}>
               <Text style={{ fontSize: 12, fontWeight: 'bold', width: 65, marginRight: 8, color: colors.primary }}>

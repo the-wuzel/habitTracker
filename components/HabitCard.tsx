@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
-import { Habit, HabitLevel, HabitLog } from '../types/habit';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ScrollView } from 'react-native';
+import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';
 import Colors from '../constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -9,7 +9,7 @@ interface HabitCardProps {
   todayLog?: HabitLog;
   streak?: number;
   last7Days?: { date: string, level: HabitLevel | null }[];
-  onLogHabit: (habitId: string, level: HabitLevel) => void;
+  onLogHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => void;
   onRemoveLog: (habitId: string) => void;
 }
 
@@ -17,6 +17,28 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
   const isLogged = !!todayLog;
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+
+  const hasOptions = habit.options && habit.options.length > 1;
+  const defaultOption = habit.options && habit.options.length > 0 ? habit.options[0] : (habit as unknown as HabitOption);
+  
+  const [selectedOptionId, setSelectedOptionId] = useState<string>(
+    todayLog?.optionId || (habit.options?.[0]?.id ?? 'default')
+  );
+
+  // Update selected option if log changes externally
+  useEffect(() => {
+    if (todayLog?.optionId) {
+      setSelectedOptionId(todayLog.optionId);
+    }
+  }, [todayLog]);
+
+  const currentOption = hasOptions 
+    ? habit.options!.find(o => o.id === selectedOptionId) || habit.options![0]
+    : defaultOption;
+
+  const handleLogHabit = (level: HabitLevel) => {
+    onLogHabit(habit.id, level, undefined, hasOptions ? selectedOptionId : undefined);
+  };
 
   return (
     <View style={styles.container}>
@@ -32,9 +54,38 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
             )}
           </View>
           
-          <View style={styles.descriptionContainer}>
-            <Text style={[styles.description, { color: colors.outline }]}>{habit.description}</Text>
-          </View>
+          {!!habit.description && (
+            <View style={styles.descriptionContainer}>
+              <Text style={[styles.description, { color: colors.outline }]}>{habit.description}</Text>
+            </View>
+          )}
+
+          {hasOptions && (
+            <View style={styles.optionsScrollContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.optionsRow}>
+                {habit.options!.map((opt) => (
+                  <TouchableOpacity
+                    key={opt.id}
+                    style={[
+                      styles.optionChip,
+                      { borderColor: colors.outline },
+                      selectedOptionId === opt.id && { backgroundColor: colors.primaryContainer, borderColor: colors.primaryContainer }
+                    ]}
+                    onPress={() => setSelectedOptionId(opt.id)}
+                  >
+                    <Text 
+                      style={[
+                        styles.optionChipText, 
+                        { color: selectedOptionId === opt.id ? colors.onPrimaryContainer : colors.outline }
+                      ]}
+                    >
+                      {opt.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
           
           <View style={styles.buttonRow}>
             <View style={styles.buttonColumn}>
@@ -43,11 +94,11 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Mini</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Mini)}>
+                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => handleLogHabit(HabitLevel.Mini)}>
                   <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Mini</Text>
                 </TouchableOpacity>
               )}
-              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{habit.miniGoal}</Text>
+              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.miniGoal}</Text>
             </View>
             
             <View style={styles.buttonColumn}>
@@ -56,11 +107,11 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Plus</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus)}>
+                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => handleLogHabit(HabitLevel.Plus)}>
                   <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Plus</Text>
                 </TouchableOpacity>
               )}
-              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{habit.plusGoal}</Text>
+              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.plusGoal}</Text>
             </View>
             
             <View style={styles.buttonColumn}>
@@ -69,18 +120,18 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   <Text style={[styles.buttonActiveText, { color: colors.onPrimaryContainer }]}>Elite</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite)}>
+                <TouchableOpacity style={[styles.buttonOutline, { borderColor: colors.outline }]} onPress={() => handleLogHabit(HabitLevel.Elite)}>
                   <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Elite</Text>
                 </TouchableOpacity>
               )}
-              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{habit.eliteGoal}</Text>
+              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
             </View>
           </View>
           
           {isLogged && (
             <View style={styles.logTextContainer}>
               <Text style={[styles.logText, { color: colors.secondary }]}>
-                Logged today as {todayLog.level}
+                Logged today as {todayLog.level} {todayLog.optionId && hasOptions ? `(${habit.options?.find(o => o.id === todayLog.optionId)?.name})` : ''}
               </Text>
             </View>
           )}
@@ -144,9 +195,28 @@ const styles = StyleSheet.create({
     fontSize: 14, // MD3 Body Medium
     letterSpacing: 0.25,
   },
+  optionsScrollContainer: {
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingBottom: 4,
+  },
+  optionChip: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  optionChipText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
   buttonRow: {
     flexDirection: 'row',
-    marginTop: 24,
+    marginTop: 16,
     justifyContent: 'space-between',
     gap: 8,
   },

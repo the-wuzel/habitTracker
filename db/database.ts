@@ -38,6 +38,19 @@ export const initializeDatabase = () => {
       FOREIGN KEY(habitId) REFERENCES habits(id) ON DELETE CASCADE
     );
   `);
+
+  // Run migrations (add options and optionId if they don't exist)
+  try {
+    db.execSync('ALTER TABLE habits ADD COLUMN options TEXT;');
+  } catch (e) {
+    // Column might already exist
+  }
+  
+  try {
+    db.execSync('ALTER TABLE habit_logs ADD COLUMN optionId TEXT;');
+  } catch (e) {
+    // Column might already exist
+  }
 };
 
 export const seedDatabase = () => {
@@ -86,22 +99,26 @@ export const seedDatabase = () => {
 
 export const getHabits = (): Habit[] => {
   const db = getDb();
-  return db.getAllSync<Habit>('SELECT * FROM habits ORDER BY createdAt DESC');
+  const rows = db.getAllSync<any>('SELECT * FROM habits ORDER BY createdAt DESC');
+  return rows.map(row => ({
+    ...row,
+    options: row.options ? JSON.parse(row.options) : []
+  }));
 };
 
 export const addHabit = (habit: Habit) => {
   const db = getDb();
   db.runSync(
-    'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt]
+    'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, options) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.options ? JSON.stringify(habit.options) : null]
   );
 };
 
 export const updateHabit = (habit: Habit) => {
   const db = getDb();
   db.runSync(
-    'UPDATE habits SET name = ?, description = ?, miniGoal = ?, plusGoal = ?, eliteGoal = ? WHERE id = ?',
-    [habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.id]
+    'UPDATE habits SET name = ?, description = ?, miniGoal = ?, plusGoal = ?, eliteGoal = ?, options = ? WHERE id = ?',
+    [habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.options ? JSON.stringify(habit.options) : null, habit.id]
   );
 };
 
@@ -128,8 +145,8 @@ export const logHabit = (log: HabitLog) => {
   
   // Insert the new log
   db.runSync(
-    'INSERT INTO habit_logs (id, habitId, date, level, notes) VALUES (?, ?, ?, ?, ?)',
-    [log.id, log.habitId, log.date, log.level, log.notes || '']
+    'INSERT INTO habit_logs (id, habitId, date, level, notes, optionId) VALUES (?, ?, ?, ?, ?, ?)',
+    [log.id, log.habitId, log.date, log.level, log.notes || '', log.optionId || null]
   );
 };
 

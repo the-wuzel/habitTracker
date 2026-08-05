@@ -13,7 +13,7 @@ interface HabitState {
   init: () => void;
   setDate: (date: string) => void;
   fetchAllLogs: () => void;
-  logHabit: (habitId: string, level: HabitLevel, notes?: string) => void;
+  logHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => void;
   removeLog: (habitId: string) => void;
   addHabit: (habit: Omit<Habit, 'id' | 'createdAt'>) => void;
   updateHabit: (habit: Habit) => void;
@@ -57,7 +57,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
   },
   
-  logHabit: (habitId: string, level: HabitLevel, notes?: string) => {
+  logHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => {
     const { currentDate, todayLogs } = get();
     
     const newLog: HabitLog = {
@@ -66,6 +66,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       date: currentDate,
       level,
       notes,
+      optionId,
     };
     
     try {

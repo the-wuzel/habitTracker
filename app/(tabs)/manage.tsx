@@ -1,9 +1,10 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, useColorScheme, Alert } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Colors from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Habit } from '../../types/habit';
+import { Habit, HabitOption } from '../../types/habit';
 
 export default function ManageHabitsScreen() {
   const { habits, addHabit, updateHabit, deleteHabit } = useHabitStore();
@@ -14,42 +15,74 @@ export default function ManageHabitsScreen() {
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [miniGoal, setMiniGoal] = useState('');
-  const [plusGoal, setPlusGoal] = useState('');
-  const [eliteGoal, setEliteGoal] = useState('');
+  
+  const defaultOption = () => ({ id: Date.now().toString(), name: 'Default Option', miniGoal: '', plusGoal: '', eliteGoal: '' });
+  const [options, setOptions] = useState<HabitOption[]>([defaultOption()]);
 
   const handleEdit = (habit: Habit) => {
     setEditingHabit(habit);
     setName(habit.name);
     setDescription(habit.description);
-    setMiniGoal(habit.miniGoal);
-    setPlusGoal(habit.plusGoal);
-    setEliteGoal(habit.eliteGoal);
+    
+    if (habit.options && habit.options.length > 0) {
+      setOptions(habit.options);
+    } else {
+      setOptions([{
+        id: Date.now().toString(),
+        name: 'Default Option',
+        miniGoal: habit.miniGoal,
+        plusGoal: habit.plusGoal,
+        eliteGoal: habit.eliteGoal,
+      }]);
+    }
     setIsCreating(true);
   };
 
   const handleSave = () => {
-    if (!name.trim() || !miniGoal.trim() || !plusGoal.trim() || !eliteGoal.trim()) {
-      Alert.alert('Validation', 'Please fill in all goal fields and the habit name.');
+    if (!name.trim()) {
+      Alert.alert('Validation', 'Please provide a habit name.');
+      return;
+    }
+
+    const invalidOption = options.find(opt => !opt.miniGoal.trim() || !opt.plusGoal.trim() || !opt.eliteGoal.trim());
+    if (invalidOption) {
+      Alert.alert('Validation', 'Please fill in all goal fields for all options.');
       return;
     }
     
+    // Pick the first option's goals as the fallback legacy fields
+    const defaultOpt = options[0];
+
     if (editingHabit) {
       updateHabit({
         ...editingHabit,
         name: name.trim(),
         description: description.trim(),
-        miniGoal: miniGoal.trim(),
-        plusGoal: plusGoal.trim(),
-        eliteGoal: eliteGoal.trim()
+        miniGoal: defaultOpt.miniGoal.trim(),
+        plusGoal: defaultOpt.plusGoal.trim(),
+        eliteGoal: defaultOpt.eliteGoal.trim(),
+        options: options.map(opt => ({
+          ...opt,
+          name: opt.name.trim(),
+          miniGoal: opt.miniGoal.trim(),
+          plusGoal: opt.plusGoal.trim(),
+          eliteGoal: opt.eliteGoal.trim(),
+        }))
       });
     } else {
       addHabit({
         name: name.trim(),
         description: description.trim(),
-        miniGoal: miniGoal.trim(),
-        plusGoal: plusGoal.trim(),
-        eliteGoal: eliteGoal.trim()
+        miniGoal: defaultOpt.miniGoal.trim(),
+        plusGoal: defaultOpt.plusGoal.trim(),
+        eliteGoal: defaultOpt.eliteGoal.trim(),
+        options: options.map(opt => ({
+          ...opt,
+          name: opt.name.trim(),
+          miniGoal: opt.miniGoal.trim(),
+          plusGoal: opt.plusGoal.trim(),
+          eliteGoal: opt.eliteGoal.trim(),
+        }))
       });
     }
 
@@ -59,9 +92,7 @@ export default function ManageHabitsScreen() {
   const handleCancel = () => {
     setName('');
     setDescription('');
-    setMiniGoal('');
-    setPlusGoal('');
-    setEliteGoal('');
+    setOptions([defaultOption()]);
     setIsCreating(false);
     setEditingHabit(null);
   };
@@ -73,9 +104,39 @@ export default function ManageHabitsScreen() {
     ]);
   };
 
+  const updateOption = (index: number, field: keyof HabitOption, value: string) => {
+    const newOptions = [...options];
+    newOptions[index] = { ...newOptions[index], [field]: value };
+    setOptions(newOptions);
+  };
+
+  const removeOption = (index: number) => {
+    if (options.length <= 1) {
+      Alert.alert('Validation', 'A habit must have at least one option.');
+      return;
+    }
+    const newOptions = [...options];
+    newOptions.splice(index, 1);
+    setOptions(newOptions);
+  };
+
+  const addOption = () => {
+    if (options.length >= 3) {
+      Alert.alert('Validation', 'You can only have up to 3 lateral options.');
+      return;
+    }
+    setOptions([...options, { id: Date.now().toString(), name: `Option ${options.length + 1}`, miniGoal: '', plusGoal: '', eliteGoal: '' }]);
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <KeyboardAwareScrollView 
+        contentContainerStyle={styles.container} 
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === 'ios' ? 100 : 50}
+        extraHeight={Platform.OS === 'ios' ? 100 : 50}
+      >
         <View style={styles.header}>
           <Text style={[styles.headerText, { color: colors.text }]}>Manage Habits</Text>
         </View>
@@ -102,31 +163,57 @@ export default function ManageHabitsScreen() {
               onChangeText={setDescription}
             />
 
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Goals</Text>
-            
-            <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
-              placeholder="Mini Goal (e.g. 1 Pushup)"
-              placeholderTextColor={colors.outline}
-              value={miniGoal}
-              onChangeText={setMiniGoal}
-            />
-            
-            <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
-              placeholder="Plus Goal (e.g. 15 Pushups)"
-              placeholderTextColor={colors.outline}
-              value={plusGoal}
-              onChangeText={setPlusGoal}
-            />
-            
-            <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
-              placeholder="Elite Goal (e.g. 30 Pushups)"
-              placeholderTextColor={colors.outline}
-              value={eliteGoal}
-              onChangeText={setEliteGoal}
-            />
+            <View style={styles.optionsHeader}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Lateral Options</Text>
+              {options.length < 3 && (
+                <TouchableOpacity onPress={addOption}>
+                  <Text style={{ color: colors.primary, fontWeight: '500' }}>+ Add Option</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {options.map((option, idx) => (
+              <View key={option.id} style={[styles.optionContainer, { borderColor: colors.outline, backgroundColor: colors.surface }]}>
+                <View style={styles.optionHeader}>
+                  <TextInput
+                    style={[styles.optionNameInput, { color: colors.text }]}
+                    value={option.name}
+                    onChangeText={(val) => updateOption(idx, 'name', val)}
+                    placeholder="Option Name (e.g. Pushups)"
+                    placeholderTextColor={colors.outline}
+                  />
+                  {options.length > 1 && (
+                    <TouchableOpacity onPress={() => removeOption(idx)}>
+                      <MaterialIcons name="close" size={20} color={colors.error} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <TextInput
+                  style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface, marginTop: 8 }]}
+                  placeholder="Mini Goal (e.g. 1 Pushup)"
+                  placeholderTextColor={colors.outline}
+                  value={option.miniGoal}
+                  onChangeText={(val) => updateOption(idx, 'miniGoal', val)}
+                />
+                
+                <TextInput
+                  style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
+                  placeholder="Plus Goal (e.g. 15 Pushups)"
+                  placeholderTextColor={colors.outline}
+                  value={option.plusGoal}
+                  onChangeText={(val) => updateOption(idx, 'plusGoal', val)}
+                />
+                
+                <TextInput
+                  style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
+                  placeholder="Elite Goal (e.g. 30 Pushups)"
+                  placeholderTextColor={colors.outline}
+                  value={option.eliteGoal}
+                  onChangeText={(val) => updateOption(idx, 'eliteGoal', val)}
+                />
+              </View>
+            ))}
 
             <View style={styles.formActions}>
               <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
@@ -142,28 +229,37 @@ export default function ManageHabitsScreen() {
             {habits.length === 0 ? (
               <Text style={{ color: colors.secondary, textAlign: 'center', marginTop: 24 }}>No habits found.</Text>
             ) : (
-              habits.map(habit => (
-                <View key={habit.id} style={[styles.habitItem, { backgroundColor: colors.surfaceVariant }]}>
-                  <View style={styles.habitItemInfo}>
-                    <Text style={[styles.habitItemName, { color: colors.text }]}>{habit.name}</Text>
-                    <Text style={{ color: colors.secondary, fontSize: 12, marginTop: 4 }}>
-                      M: {habit.miniGoal} | P: {habit.plusGoal} | E: {habit.eliteGoal}
-                    </Text>
+              habits.map(habit => {
+                const displayOpt = habit.options && habit.options.length > 0 ? habit.options[0] : habit;
+                return (
+                  <View key={habit.id} style={[styles.habitItem, { backgroundColor: colors.surfaceVariant }]}>
+                    <View style={styles.habitItemInfo}>
+                      <Text style={[styles.habitItemName, { color: colors.text }]}>{habit.name}</Text>
+                      {habit.options && habit.options.length > 1 ? (
+                        <Text style={{ color: colors.secondary, fontSize: 12, marginTop: 4 }}>
+                          {habit.options.length} Options
+                        </Text>
+                      ) : (
+                        <Text style={{ color: colors.secondary, fontSize: 12, marginTop: 4 }}>
+                          M: {displayOpt.miniGoal} | P: {displayOpt.plusGoal} | E: {displayOpt.eliteGoal}
+                        </Text>
+                      )}
+                    </View>
+                    <View style={styles.habitItemActions}>
+                      <TouchableOpacity onPress={() => handleEdit(habit)} style={{ padding: 8 }}>
+                        <MaterialIcons name="edit" color={colors.primary} size={24} />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => handleDelete(habit.id)} style={{ padding: 8 }}>
+                        <MaterialIcons name="delete" color={colors.error} size={24} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <View style={styles.habitItemActions}>
-                    <TouchableOpacity onPress={() => handleEdit(habit)} style={{ padding: 8 }}>
-                      <MaterialIcons name="edit" color={colors.primary} size={24} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(habit.id)} style={{ padding: 8 }}>
-                      <MaterialIcons name="delete" color={colors.error} size={24} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))
+                );
+              })
             )}
           </View>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {!isCreating && (
         <TouchableOpacity 
@@ -210,8 +306,33 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  optionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 8,
+    marginBottom: 12,
+  },
+  optionContainer: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  optionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+    paddingBottom: 8,
     marginBottom: 8,
+  },
+  optionNameInput: {
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
   },
   input: {
     borderWidth: 1,
@@ -223,7 +344,7 @@ const styles = StyleSheet.create({
   formActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 16,
+    marginTop: 8,
     gap: 16,
   },
   cancelBtn: {

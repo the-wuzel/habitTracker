@@ -37,6 +37,11 @@ export const initializeDatabase = () => {
       notes TEXT,
       FOREIGN KEY(habitId) REFERENCES habits(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY NOT NULL,
+      value TEXT NOT NULL
+    );
   `);
 
   // Run migrations (add options and optionId if they don't exist)
@@ -153,4 +158,18 @@ export const logHabit = (log: HabitLog) => {
 export const removeHabitLog = (habitId: string, date: string) => {
   const db = getDb();
   db.runSync('DELETE FROM habit_logs WHERE habitId = ? AND date = ?', [habitId, date]);
+};
+
+export const getSetting = (key: string, defaultValue: string): string => {
+  const db = getDb();
+  const result = db.getFirstSync<{ value: string }>('SELECT value FROM settings WHERE key = ?', [key]);
+  return result ? result.value : defaultValue;
+};
+
+export const setSetting = (key: string, value: string) => {
+  const db = getDb();
+  db.runSync(
+    'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+    [key, value]
+  );
 };

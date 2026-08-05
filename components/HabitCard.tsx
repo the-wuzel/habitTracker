@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ScrollView } 
 import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';
 import Colors from '../constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useHabitStore } from '../store/habitStore';
 
 interface HabitCardProps {
   habit: Habit;
@@ -17,8 +18,9 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
   const isLogged = !!todayLog;
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+  const { enableLateralFlexibility } = useHabitStore();
 
-  const hasOptions = habit.options && habit.options.length > 1;
+  const hasOptions = enableLateralFlexibility && habit.options && habit.options.length > 1;
   const defaultOption = habit.options && habit.options.length > 0 ? habit.options[0] : (habit as unknown as HabitOption);
   
   const [selectedOptionId, setSelectedOptionId] = useState<string>(

@@ -1,18 +1,19 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View, Platform } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View, Platform, Switch, Modal } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Colors from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';
 import { Habit, HabitOption } from '../../types/habit';
 
 export default function ManageHabitsScreen() {
-  const { habits, addHabit, updateHabit, deleteHabit } = useHabitStore();
+  const { habits, addHabit, updateHabit, deleteHabit, loadMockData, enableLateralFlexibility, toggleLateralFlexibility } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [habitToDelete, setHabitToDelete] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   
@@ -98,10 +99,18 @@ export default function ManageHabitsScreen() {
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete Habit', 'Are you sure you want to delete this habit? All its logs will also be deleted.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteHabit(id) }
-    ]);
+    setHabitToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (habitToDelete) {
+      deleteHabit(habitToDelete);
+      setHabitToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setHabitToDelete(null);
   };
 
   const updateOption = (index: number, field: keyof HabitOption, value: string) => {
@@ -128,6 +137,18 @@ export default function ManageHabitsScreen() {
     setOptions([...options, { id: Date.now().toString(), name: `Option ${options.length + 1}`, miniGoal: '', plusGoal: '', eliteGoal: '' }]);
   };
 
+  const moveOption = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === options.length - 1) return;
+    
+    const newOptions = [...options];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    const temp = newOptions[targetIndex];
+    newOptions[targetIndex] = newOptions[index];
+    newOptions[index] = temp;
+    setOptions(newOptions);
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <KeyboardAwareScrollView 
@@ -139,6 +160,29 @@ export default function ManageHabitsScreen() {
       >
         <View style={styles.header}>
           <Text style={[styles.headerText, { color: colors.text }]}>Manage Habits</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text style={{ color: colors.text, fontSize: 10 }}>Lateral Flex.</Text>
+              <Switch 
+                value={enableLateralFlexibility} 
+                onValueChange={toggleLateralFlexibility}
+                trackColor={{ false: colors.surfaceVariant, true: colors.primaryContainer }}
+                thumbColor={enableLateralFlexibility ? colors.primary : colors.secondary}
+                style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+              />
+            </View>
+            <TouchableOpacity 
+              style={[styles.mockBtn, { backgroundColor: colors.primaryContainer }]} 
+              onPress={() => {
+                Alert.alert('Load Mock Data', 'This will delete all current habits and logs. Are you sure?', [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Load Data', onPress: loadMockData }
+                ]);
+              }}
+            >
+              <Text style={{ color: colors.onPrimaryContainer, fontSize: 12, fontWeight: '500' }}>Mock</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {isCreating ? (
@@ -163,34 +207,49 @@ export default function ManageHabitsScreen() {
               onChangeText={setDescription}
             />
 
-            <View style={styles.optionsHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Lateral Options</Text>
-              {options.length < 3 && (
-                <TouchableOpacity onPress={addOption}>
-                  <Text style={{ color: colors.primary, fontWeight: '500' }}>+ Add Option</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            {enableLateralFlexibility && (
+              <View style={styles.optionsHeader}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Lateral Options</Text>
+                {options.length < 3 && (
+                  <TouchableOpacity onPress={addOption}>
+                    <Text style={{ color: colors.primary, fontWeight: '500' }}>+ Add Option</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
 
-            {options.map((option, idx) => (
-              <View key={option.id} style={[styles.optionContainer, { borderColor: colors.outline, backgroundColor: colors.surface }]}>
-                <View style={styles.optionHeader}>
-                  <TextInput
-                    style={[styles.optionNameInput, { color: colors.text }]}
-                    value={option.name}
-                    onChangeText={(val) => updateOption(idx, 'name', val)}
-                    placeholder="Option Name (e.g. Pushups)"
-                    placeholderTextColor={colors.outline}
-                  />
-                  {options.length > 1 && (
-                    <TouchableOpacity onPress={() => removeOption(idx)}>
-                      <MaterialIcons name="close" size={20} color={colors.error} />
-                    </TouchableOpacity>
-                  )}
-                </View>
+            {options.map((option, idx) => {
+              if (!enableLateralFlexibility && idx > 0) return null;
+              
+              return (
+              <View key={option.id} style={enableLateralFlexibility ? [styles.optionContainer, { borderColor: colors.outline, backgroundColor: colors.surface }] : { marginTop: 16 }}>
+                {enableLateralFlexibility && (
+                  <View style={styles.optionHeader}>
+                    <TextInput
+                      style={[styles.optionNameInput, { color: colors.text }]}
+                      value={option.name}
+                      onChangeText={(val) => updateOption(idx, 'name', val)}
+                      placeholder="Option Name (e.g. Pushups)"
+                      placeholderTextColor={colors.outline}
+                    />
+                    {options.length > 1 && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <TouchableOpacity onPress={() => moveOption(idx, 'up')} disabled={idx === 0} style={{ opacity: idx === 0 ? 0.3 : 1 }}>
+                          <MaterialIcons name="arrow-upward" size={20} color={colors.text} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => moveOption(idx, 'down')} disabled={idx === options.length - 1} style={{ opacity: idx === options.length - 1 ? 0.3 : 1 }}>
+                          <MaterialIcons name="arrow-downward" size={20} color={colors.text} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => removeOption(idx)}>
+                          <MaterialIcons name="close" size={20} color={colors.error} />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                )}
 
                 <TextInput
-                  style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface, marginTop: 8 }]}
+                  style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface, marginTop: enableLateralFlexibility ? 8 : 0 }]}
                   placeholder="Mini Goal (e.g. 1 Pushup)"
                   placeholderTextColor={colors.outline}
                   value={option.miniGoal}
@@ -213,7 +272,8 @@ export default function ManageHabitsScreen() {
                   onChangeText={(val) => updateOption(idx, 'eliteGoal', val)}
                 />
               </View>
-            ))}
+              );
+            })}
 
             <View style={styles.formActions}>
               <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
@@ -235,7 +295,7 @@ export default function ManageHabitsScreen() {
                   <View key={habit.id} style={[styles.habitItem, { backgroundColor: colors.surfaceVariant }]}>
                     <View style={styles.habitItemInfo}>
                       <Text style={[styles.habitItemName, { color: colors.text }]}>{habit.name}</Text>
-                      {habit.options && habit.options.length > 1 ? (
+                      {enableLateralFlexibility && habit.options && habit.options.length > 1 ? (
                         <Text style={{ color: colors.secondary, fontSize: 12, marginTop: 4 }}>
                           {habit.options.length} Options
                         </Text>
@@ -269,6 +329,31 @@ export default function ManageHabitsScreen() {
           <MaterialIcons name="add" color={colors.onPrimaryContainer} size={28} />
         </TouchableOpacity>
       )}
+
+      <Modal
+        visible={habitToDelete !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={cancelDelete}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalDialog, { backgroundColor: colors.surface }]}>
+            <MaterialIcons name="delete-outline" size={24} color={colors.error} style={{ alignSelf: 'center', marginBottom: 16 }} />
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Delete Habit?</Text>
+            <Text style={[styles.modalText, { color: colors.secondary }]}>
+              Are you sure you want to delete this habit? All its logs will also be deleted. This action cannot be undone.
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalBtn} onPress={cancelDelete}>
+                <Text style={{ color: colors.primary, fontWeight: '500' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalBtn} onPress={confirmDelete}>
+                <Text style={{ color: colors.error, fontWeight: '500' }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -282,7 +367,15 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
+  },
+  mockBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
   headerText: {
     fontSize: 24,
@@ -392,5 +485,47 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalDialog: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 28, // MD3 standard
+    padding: 24,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '400',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  modalBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    minWidth: 64,
+    alignItems: 'center',
   }
 });

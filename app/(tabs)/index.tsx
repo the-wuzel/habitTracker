@@ -7,6 +7,32 @@ import HabitCard from '../../components/HabitCard';
 import { useHabitStore } from '../../store/habitStore';
 import { calculatePeriodStats, calculateStreak } from '../../utils/score';
 
+const formatHeaderDate = (dateString: string) => {
+  const today = new Date().toISOString().split('T')[0];
+  if (dateString === today) return "Today's Habits";
+  
+  const yesterdayObj = new Date();
+  yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+  const yesterday = yesterdayObj.toISOString().split('T')[0];
+  if (dateString === yesterday) return "Yesterday's Habits";
+
+  const tomorrowObj = new Date();
+  tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+  const tomorrow = tomorrowObj.toISOString().split('T')[0];
+  if (dateString === tomorrow) return "Tomorrow's Habits";
+
+  const [year, month, day] = dateString.split('-');
+  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  const dayOfWeek = days[dateObj.getDay()];
+  const currentYear = new Date().getFullYear().toString();
+  const yearStr = year !== currentYear ? `, ${year}` : '';
+  
+  return `${dayOfWeek}, ${months[parseInt(month) - 1]} ${parseInt(day)}${yearStr}`;
+};
+
 export default function TabOneScreen() {
   const { habits, todayLogs, currentDate, isLoading, init, setDate, logHabit, removeLog, allLogs } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
@@ -45,6 +71,12 @@ export default function TabOneScreen() {
     setDate(date.toISOString().split('T')[0]);
   };
 
+  const handleGoToToday = () => {
+    setDate(new Date().toISOString().split('T')[0]);
+  };
+
+  const isToday = currentDate === new Date().toISOString().split('T')[0];
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -61,12 +93,17 @@ export default function TabOneScreen() {
             <MaterialIcons name="chevron-left" color={colors.primary} size={24} />
           </TouchableOpacity>
           <Text style={[styles.headerText, { color: colors.text, flex: 1, textAlign: 'center' }]} numberOfLines={1}>
-            {currentDate === new Date().toISOString().split('T')[0] ? "Today's Habits" : currentDate}
+            {formatHeaderDate(currentDate)}
           </Text>
           <TouchableOpacity onPress={handleNextDay} style={styles.navButton}>
             <MaterialIcons name="chevron-right" color={colors.primary} size={24} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsSimplifiedView(!isSimplifiedView)} style={[styles.navButton, { marginLeft: 8 }]}>
+          {!isToday && (
+            <TouchableOpacity onPress={handleGoToToday} style={[styles.navButton, { marginLeft: 4 }]}>
+              <MaterialIcons name="today" color={colors.primary} size={24} />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={() => setIsSimplifiedView(!isSimplifiedView)} style={[styles.navButton, { marginLeft: 4 }]}>
             <MaterialIcons name={isSimplifiedView ? "visibility-off" : "visibility"} color={colors.primary} size={24} />
           </TouchableOpacity>
         </View>
@@ -102,7 +139,7 @@ export default function TabOneScreen() {
             
             const last7Days = [];
             for (let i = 6; i >= 0; i--) {
-              const d = new Date(currentDate);
+              const d = new Date();
               d.setDate(d.getDate() - i);
               const dateStr = d.toISOString().split('T')[0];
               const logForDay = hLogs.find(l => l.date === dateStr);

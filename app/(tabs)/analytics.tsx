@@ -218,8 +218,13 @@ export default function AnalyticsScreen() {
                       initial = 'E'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
                     }
                     
+                    const isToday = day.date === currentDate;
+                    if (isToday) {
+                      borderColor = colors.primary;
+                    }
+
                     return (
-                      <View key={idx} style={[styles.historyCircle, { backgroundColor: bgColor, borderColor }]}>
+                      <View key={idx} style={[styles.historyCircle, { backgroundColor: bgColor, borderColor, borderWidth: isToday ? 2 : 1 }]}>
                         <Text style={[styles.historyText, { color: textColor }]}>{initial}</Text>
                       </View>
                     );

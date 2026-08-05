@@ -6,47 +6,9 @@ import { HabitLevel, HabitLog, Habit } from '@/types/habit';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { MaterialIcons } from '@expo/vector-icons';
+import { calculatePeriodStats } from '@/utils/score';
 
-const getLevelScore = (level: HabitLevel) => {
-  switch (level) {
-    case HabitLevel.Mini: return 1;
-    case HabitLevel.Plus: return 2;
-    case HabitLevel.Elite: return 3;
-    default: return 0;
-  }
-};
 
-const calculateStreak = (logs: HabitLog[], todayStr: string) => {
-  if (logs.length === 0) return 0;
-  
-  const uniqueDates = [...new Set(logs.map(l => l.date))].sort((a, b) => b.localeCompare(a));
-  const todayDate = new Date(todayStr); // Parses as UTC if YYYY-MM-DD
-  
-  let currentStreak = 0;
-  let d = new Date(todayDate.getTime());
-  
-  const formatD = (date: Date) => date.toISOString().split('T')[0];
-
-  // Check if today is logged
-  if (uniqueDates.includes(formatD(d))) {
-    currentStreak++;
-    d.setDate(d.getDate() - 1);
-  } else {
-    // If today is not logged, check yesterday. If yesterday is not logged, streak is 0.
-    d.setDate(d.getDate() - 1);
-    if (!uniqueDates.includes(formatD(d))) {
-      return 0;
-    }
-  }
-
-  // Count backwards continuously
-  while (uniqueDates.includes(formatD(d))) {
-    currentStreak++;
-    d.setDate(d.getDate() - 1);
-  }
-
-  return currentStreak;
-};
 
 export default function AnalyticsScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -112,91 +74,9 @@ export default function AnalyticsScreen() {
   };
 
   const { totalScore, habitStats } = useMemo(() => {
-    let score = 0;
-    const stats: Record<string, { points: number, streak: number, name: string }> = {};
-
     // Filter logs for the active period
     const periodLogs = allLogs.filter(l => l.date >= periodStart && l.date <= periodEnd);
-
-    // Initialize stats
-    habits.forEach(h => {
-      stats[h.id] = { points: 0, streak: 0, name: h.name };
-    });
-
-    // Calculate points and streaks
-    habits.forEach(h => {
-      // Sort logs chronologically within the period
-      const hLogs = periodLogs.filter(l => l.habitId === h.id).sort((a, b) => a.date.localeCompare(b.date));
-      
-      let eliteStreak = 0;
-      let overallStreak = 0;
-      let habitPoints = 0;
-      let habitEliteCount = 0;
-      let lastDate: Date | null = null;
-
-      hLogs.forEach(log => {
-        const logDate = new Date(log.date);
-        
-        // Track streaks
-        if (lastDate) {
-          // Calculate difference in days (ignoring daylight savings issues by using UTC strings or approx ms)
-          const diffTime = Math.abs(logDate.getTime() - lastDate.getTime());
-          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-          
-          if (diffDays === 1) {
-            overallStreak++;
-            if (log.level === HabitLevel.Elite) eliteStreak++;
-            else eliteStreak = 0;
-          } else if (diffDays > 1) {
-            overallStreak = 1;
-            if (log.level === HabitLevel.Elite) eliteStreak = 1;
-            else eliteStreak = 0;
-          }
-        } else {
-          overallStreak = 1;
-          if (log.level === HabitLevel.Elite) eliteStreak = 1;
-        }
-        
-        lastDate = logDate;
-        
-        // Base points
-        habitPoints += getLevelScore(log.level);
-        
-        // Bonuses
-        if (log.level === HabitLevel.Elite) {
-          habitEliteCount++;
-          if (habitEliteCount % 10 === 0) habitPoints += 3; // Specialist
-        }
-
-        if (eliteStreak === 3) habitPoints += 3;
-        if (eliteStreak === 7) habitPoints += 5;
-        if (overallStreak > 0 && overallStreak % 15 === 0) habitPoints += 20; // Habit Master
-      });
-
-      stats[h.id].points = habitPoints;
-      
-      const refDate = (currentDate >= periodStart && currentDate <= periodEnd) ? currentDate : periodEnd;
-      stats[h.id].streak = calculateStreak(hLogs, refDate);
-      
-      score += habitPoints;
-    });
-
-    // Calculate global bonuses (Perfect Day & Big Hitter)
-    const totalEliteWins = periodLogs.filter(l => l.level === HabitLevel.Elite).length;
-    score += Math.floor(totalEliteWins / 15) * 3; // Big Hitter
-
-    if (habits.length > 0) {
-      const uniqueDates = [...new Set(periodLogs.map(l => l.date))];
-      uniqueDates.forEach(date => {
-        const eliteLogsForDate = periodLogs.filter(l => l.date === date && l.level === HabitLevel.Elite);
-        // If the user got an Elite win for all currently tracked habits on this date
-        if (eliteLogsForDate.length === habits.length) {
-          score += 2;
-        }
-      });
-    }
-
-    return { totalScore: score, habitStats: Object.values(stats) };
+    return calculatePeriodStats(habits, periodLogs, currentDate, periodEnd);
   }, [habits, allLogs, currentDate, periodStart, periodEnd]);
 
   return (

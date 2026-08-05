@@ -2,15 +2,18 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
 import { Habit, HabitLevel, HabitLog } from '../types/habit';
 import Colors from '../constants/Colors';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface HabitCardProps {
   habit: Habit;
   todayLog?: HabitLog;
+  streak?: number;
+  last7Days?: { date: string, level: HabitLevel | null }[];
   onLogHabit: (habitId: string, level: HabitLevel) => void;
   onRemoveLog: (habitId: string) => void;
 }
 
-export default function HabitCard({ habit, todayLog, onLogHabit, onRemoveLog }: HabitCardProps) {
+export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [], onLogHabit, onRemoveLog }: HabitCardProps) {
   const isLogged = !!todayLog;
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
@@ -19,7 +22,15 @@ export default function HabitCard({ habit, todayLog, onLogHabit, onRemoveLog }: 
     <View style={styles.container}>
       <View style={[styles.card, { backgroundColor: colors.surfaceVariant }]}>
         <View style={styles.cardContent}>
-          <Text style={[styles.title, { color: colors.text }]}>{habit.name}</Text>
+          <View style={styles.headerRow}>
+            <Text style={[styles.title, { color: colors.text }]}>{habit.name}</Text>
+            {streak > 0 && (
+              <View style={styles.streakContainer}>
+                <MaterialIcons name="local-fire-department" size={18} color="#FF9800" />
+                <Text style={styles.streakText}>{streak}</Text>
+              </View>
+            )}
+          </View>
           
           <View style={styles.descriptionContainer}>
             <Text style={[styles.description, { color: colors.outline }]}>{habit.description}</Text>
@@ -71,6 +82,31 @@ export default function HabitCard({ habit, todayLog, onLogHabit, onRemoveLog }: 
               <Text style={[styles.logText, { color: colors.secondary }]}>
                 Logged today as {todayLog.level}
               </Text>
+            </View>
+          )}
+          
+          {last7Days.length > 0 && (
+            <View style={styles.historyContainer}>
+              {last7Days.map((day, idx) => {
+                let initial = '';
+                let bgColor = 'transparent';
+                let textColor = colors.outline;
+                let borderColor = colors.outline;
+
+                if (day.level === HabitLevel.Mini) {
+                  initial = 'M'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                } else if (day.level === HabitLevel.Plus) {
+                  initial = 'P'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                } else if (day.level === HabitLevel.Elite) {
+                  initial = 'E'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                }
+                
+                return (
+                  <View key={idx} style={[styles.historyCircle, { backgroundColor: bgColor, borderColor }]}>
+                    <Text style={[styles.historyText, { color: textColor }]}>{initial}</Text>
+                  </View>
+                );
+              })}
             </View>
           )}
         </View>
@@ -156,5 +192,44 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 14, // MD3 Label Large
     letterSpacing: 0.1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  streakContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  streakText: {
+    color: '#FF9800',
+    fontWeight: 'bold',
+    marginLeft: 4,
+    fontSize: 12,
+  },
+  historyContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  historyCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  historyText: {
+    fontSize: 12,
+    fontWeight: 'bold',
   }
 });

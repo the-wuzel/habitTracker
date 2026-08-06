@@ -257,10 +257,10 @@ export default function AnalyticsScreen() {
                   </View>
                   
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[styles.countText, { color: colors.text }]}>M:{pp.counts.mini}</Text>
-                    <Text style={[styles.countText, { color: colors.text }]}>P:{pp.counts.plus}</Text>
-                    <Text style={[styles.countText, { color: colors.text }]}>E:{pp.counts.elite}</Text>
-                    <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Tot:{pp.counts.total}</Text>
+                    <Text style={[styles.countText, { color: colors.text }]}>Mini: {pp.counts.mini}</Text>
+                    <Text style={[styles.countText, { color: colors.text }]}>Plus: {pp.counts.plus}</Text>
+                    <Text style={[styles.countText, { color: colors.text }]}>Elite: {pp.counts.elite}</Text>
+                    <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Total: {pp.counts.total}</Text>
                   </View>
                 </View>
               );
@@ -271,10 +271,10 @@ export default function AnalyticsScreen() {
                 Total
               </Text>
               <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
-                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>M:{periodProgress.reduce((sum, pp) => sum + pp.counts.mini, 0)}</Text>
-                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>P:{periodProgress.reduce((sum, pp) => sum + pp.counts.plus, 0)}</Text>
-                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>E:{periodProgress.reduce((sum, pp) => sum + pp.counts.elite, 0)}</Text>
-                <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Tot:{periodProgress.reduce((sum, pp) => sum + pp.counts.total, 0)}</Text>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>Mini: {periodProgress.reduce((sum, pp) => sum + pp.counts.mini, 0)}</Text>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>Plus: {periodProgress.reduce((sum, pp) => sum + pp.counts.plus, 0)}</Text>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: '600' }]}>Elite: {periodProgress.reduce((sum, pp) => sum + pp.counts.elite, 0)}</Text>
+                <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Total: {periodProgress.reduce((sum, pp) => sum + pp.counts.total, 0)}</Text>
               </View>
             </View>
           </View>

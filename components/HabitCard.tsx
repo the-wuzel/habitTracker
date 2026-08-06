@@ -77,9 +77,9 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       key={opt.id}
                       style={[
                         styles.optionChip,
-                        { borderColor: isSelected ? colors.primaryContainer : colors.outlineVariant },
-                        isCompleted && { backgroundColor: colors.primary, borderColor: colors.primary },
-                        isSelected && { backgroundColor: colors.primaryContainer }
+                        { borderColor: colors.outlineVariant },
+                        isSelected && { backgroundColor: colors.primaryContainer, borderColor: colors.primaryContainer },
+                        isCompleted && !isSelected && { borderColor: colors.primaryContainer, borderWidth: 1.5 },
                       ]}
                       onPress={() => setSelectedOptionId(opt.id)}
                     >
@@ -87,8 +87,8 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       style={[
                         styles.optionChipText, 
                         { color: colors.outline },
-                        isCompleted && { color: colors.onPrimary },
-                        isSelected && { color: colors.onPrimaryContainer }
+                        isSelected && { color: colors.onPrimaryContainer },
+                        isCompleted && !isSelected && { color: colors.onPrimaryContainer, fontWeight: 'bold' },
                       ]}
                     >
                       {opt.name}
@@ -105,14 +105,18 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               {todayLog?.level === HabitLevel.Mini ? (
                 <TouchableOpacity 
                   style={[
-                    styles.buttonActive, 
-                    { backgroundColor: todayLog.optionId === selectedOptionId ? colors.primaryContainer : colors.primary }
+                    todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
+                    todayLog.optionId === selectedOptionId 
+                      ? { backgroundColor: colors.primaryContainer } 
+                      : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
-                    styles.buttonActiveText, 
-                    { color: todayLog.optionId === selectedOptionId ? colors.onPrimaryContainer : colors.onPrimary }
+                    todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
+                    todayLog.optionId === selectedOptionId 
+                      ? { color: colors.onPrimaryContainer }
+                      : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
                     Mini
                   </Text>
@@ -129,14 +133,18 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               {todayLog?.level === HabitLevel.Plus ? (
                 <TouchableOpacity 
                   style={[
-                    styles.buttonActive, 
-                    { backgroundColor: todayLog.optionId === selectedOptionId ? colors.primaryContainer : colors.primary }
+                    todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
+                    todayLog.optionId === selectedOptionId 
+                      ? { backgroundColor: colors.primaryContainer } 
+                      : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
-                    styles.buttonActiveText, 
-                    { color: todayLog.optionId === selectedOptionId ? colors.onPrimaryContainer : colors.onPrimary }
+                    todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
+                    todayLog.optionId === selectedOptionId 
+                      ? { color: colors.onPrimaryContainer }
+                      : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
                     Plus
                   </Text>
@@ -153,14 +161,18 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               {todayLog?.level === HabitLevel.Elite ? (
                 <TouchableOpacity 
                   style={[
-                    styles.buttonActive, 
-                    { backgroundColor: todayLog.optionId === selectedOptionId ? colors.primaryContainer : colors.primary }
+                    todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
+                    todayLog.optionId === selectedOptionId 
+                      ? { backgroundColor: colors.primaryContainer } 
+                      : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
-                    styles.buttonActiveText, 
-                    { color: todayLog.optionId === selectedOptionId ? colors.onPrimaryContainer : colors.onPrimary }
+                    todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
+                    todayLog.optionId === selectedOptionId 
+                      ? { color: colors.onPrimaryContainer }
+                      : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
                     Elite
                   </Text>

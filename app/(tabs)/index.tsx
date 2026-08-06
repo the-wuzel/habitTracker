@@ -80,34 +80,35 @@ export default function TabOneScreen() {
     setDate(new Date().toISOString().split('T')[0]);
   };
 
-  const handleLogHabit = (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => {
-    const [year, month, day] = currentDate.split('-');
+  const handleLogHabit = (habitId: string, level: HabitLevel, notes?: string, optionId?: string, logDate?: string) => {
+    const targetDate = logDate || currentDate;
+    const [year, month, day] = targetDate.split('-');
     const isFirstHalf = parseInt(day) <= 15;
     const periodStart = `${year}-${month}-01`;
     const endDay = isFirstHalf ? '15' : '30';
     const periodEnd = `${year}-${month}-${endDay}`;
     const periodLogsBefore = allLogs.filter(l => l.date >= periodStart && l.date <= periodEnd);
     
-    const statsBefore = calculatePeriodStats(habits, periodLogsBefore, currentDate, periodEnd);
+    const statsBefore = calculatePeriodStats(habits, periodLogsBefore, targetDate, periodEnd);
     
     // Perform log
-    logHabit(habitId, level, notes, optionId);
+    logHabit(habitId, level, notes, optionId, targetDate);
     
     // Simulate what the stats are after log
     const newLog: HabitLog = {
       id: 'temp',
       habitId,
-      date: currentDate,
+      date: targetDate,
       level,
       notes,
       optionId,
     };
     
     const periodLogsAfter = [
-      ...periodLogsBefore.filter(l => !(l.habitId === habitId && l.date === currentDate)), 
+      ...periodLogsBefore.filter(l => !(l.habitId === habitId && l.date === targetDate)), 
       newLog
     ];
-    const statsAfter = calculatePeriodStats(habits, periodLogsAfter, currentDate, periodEnd);
+    const statsAfter = calculatePeriodStats(habits, periodLogsAfter, targetDate, periodEnd);
     
     const newlyAchieved: {title: string, description: string}[] = [];
     if (statsAfter.bonusCounts.specialist > statsBefore.bonusCounts.specialist) newlyAchieved.push({ title: 'Specialist', description: '10 Elite wins for one habit' });
@@ -198,7 +199,8 @@ export default function TabOneScreen() {
               const logForDay = hLogs.find(l => l.date === dateStr);
               last7Days.push({
                 date: dateStr,
-                level: logForDay ? logForDay.level : null
+                level: logForDay ? logForDay.level : null,
+                log: logForDay
               });
             }
 

@@ -8,7 +8,7 @@ import { Habit, HabitOption } from '../../types/habit';
 import { useColorScheme } from '../../components/useColorScheme';
 
 export default function ManageHabitsScreen() {
-  const { habits, addHabit, updateHabit, deleteHabit, loadMockData, enableLateralFlexibility, toggleLateralFlexibility, themeMode, setThemeMode } = useHabitStore();
+  const { habits, addHabit, updateHabit, deleteHabit, loadMockData, enableLateralFlexibility, toggleLateralFlexibility, themeMode, setThemeMode, compactMode, toggleCompactMode } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
@@ -174,16 +174,6 @@ export default function ManageHabitsScreen() {
         <View style={styles.header}>
           <Text style={[styles.headerText, { color: colors.text }]}>Manage Habits</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Text style={{ color: colors.text, fontSize: 10 }}>Lateral Flex.</Text>
-              <Switch 
-                value={enableLateralFlexibility} 
-                onValueChange={toggleLateralFlexibility}
-                trackColor={{ false: colors.surfaceVariant, true: colors.primaryContainer }}
-                thumbColor={enableLateralFlexibility ? colors.primary : colors.secondary}
-                style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
-              />
-            </View>
             <TouchableOpacity 
               style={{ padding: 6, backgroundColor: colors.surfaceVariant, borderRadius: 20 }}
               onPress={cycleTheme}
@@ -201,6 +191,29 @@ export default function ManageHabitsScreen() {
             >
               <Text style={{ color: colors.onPrimaryContainer, fontSize: 12, fontWeight: '500' }}>Mock</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.settingsRow}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ color: colors.text, fontSize: 14 }}>Lateral Flexibility</Text>
+            <Switch 
+              value={enableLateralFlexibility} 
+              onValueChange={toggleLateralFlexibility}
+              trackColor={{ false: colors.surfaceVariant, true: colors.primaryContainer }}
+              thumbColor={enableLateralFlexibility ? colors.primary : colors.secondary}
+              style={{ transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }] }}
+            />
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ color: colors.text, fontSize: 14 }}>Compact Mode</Text>
+            <Switch 
+              value={compactMode} 
+              onValueChange={toggleCompactMode}
+              trackColor={{ false: colors.surfaceVariant, true: colors.primaryContainer }}
+              thumbColor={compactMode ? colors.primary : colors.secondary}
+              style={{ transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }] }}
+            />
           </View>
         </View>
 
@@ -389,7 +402,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
+  },
+  settingsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
+    paddingHorizontal: 4,
   },
   mockBtn: {
     paddingHorizontal: 12,

@@ -11,20 +11,22 @@ interface HabitState {
   enableLateralFlexibility: boolean;
   hasCompletedOnboarding: boolean;
   themeMode: 'system' | 'light' | 'dark';
+  compactMode: boolean;
   
   // Actions
   init: () => void;
   completeOnboarding: () => void;
   setDate: (date: string) => void;
   fetchAllLogs: () => void;
-  logHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => void;
-  removeLog: (habitId: string) => void;
+  logHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string, dateStr?: string) => void;
+  removeLog: (habitId: string, dateStr?: string) => void;
   addHabit: (habit: Omit<Habit, 'id' | 'createdAt'>) => void;
   updateHabit: (habit: Habit) => void;
   deleteHabit: (id: string) => void;
   loadMockData: () => void;
   toggleLateralFlexibility: () => void;
   setThemeMode: (mode: 'system' | 'light' | 'dark') => void;
+  toggleCompactMode: () => void;
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -36,6 +38,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   enableLateralFlexibility: true,
   hasCompletedOnboarding: true, // Will be overridden in init
   themeMode: 'system',
+  compactMode: false,
   
   init: () => {
     try {
@@ -48,8 +51,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const enableLateralFlexibility = getSetting('enableLateralFlexibility', 'true') === 'true';
       const hasCompletedOnboarding = getSetting('hasCompletedOnboarding', 'false') === 'true';
       const themeMode = getSetting('themeMode', 'system') as 'system' | 'light' | 'dark';
+      const compactMode = getSetting('compactMode', 'false') === 'true';
       
-      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility, hasCompletedOnboarding, themeMode });
+      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility, hasCompletedOnboarding, themeMode, compactMode });
     } catch (error) {
       console.error('Failed to initialize database:', error);
       set({ isLoading: false });
@@ -70,13 +74,14 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
   },
   
-  logHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string) => {
+  logHabit: (habitId: string, level: HabitLevel, notes?: string, optionId?: string, dateStr?: string) => {
     const { currentDate, todayLogs } = get();
+    const targetDate = dateStr || currentDate;
     
     const newLog: HabitLog = {
       id: Date.now().toString(),
       habitId,
-      date: currentDate,
+      date: targetDate,
       level,
       notes,
       optionId,
@@ -87,7 +92,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       logHabit(newLog);
       
       // Update local state
-      const updatedLogs = [...todayLogs.filter(log => log.habitId !== habitId), newLog];
+      let updatedLogs = todayLogs;
+      if (targetDate === currentDate) {
+        updatedLogs = [...todayLogs.filter(log => log.habitId !== habitId), newLog];
+      }
       const allLogs = getAllHabitLogs();
       set({ todayLogs: updatedLogs, allLogs });
     } catch (error) {
@@ -95,11 +103,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
   },
 
-  removeLog: (habitId: string) => {
+  removeLog: (habitId: string, dateStr?: string) => {
     const { currentDate, todayLogs } = get();
+    const targetDate = dateStr || currentDate;
     try {
-      removeHabitLog(habitId, currentDate);
-      const updatedLogs = todayLogs.filter(log => log.habitId !== habitId);
+      removeHabitLog(habitId, targetDate);
+      
+      let updatedLogs = todayLogs;
+      if (targetDate === currentDate) {
+        updatedLogs = todayLogs.filter(log => log.habitId !== habitId);
+      }
+      
       const allLogs = getAllHabitLogs();
       set({ todayLogs: updatedLogs, allLogs });
     } catch (error) {
@@ -257,6 +271,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({ themeMode: mode });
     } catch (error) {
       console.error('Failed to save theme mode:', error);
+    }
+  },
+  
+  toggleCompactMode: () => {
+    const current = get().compactMode;
+    const newValue = !current;
+    try {
+      setSetting('compactMode', newValue.toString());
+      set({ compactMode: newValue });
+    } catch (error) {
+      console.error('Failed to toggle compact mode setting:', error);
     }
   }
 }));

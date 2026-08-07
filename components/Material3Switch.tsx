@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Pressable, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useColorScheme } from './useColorScheme';
 import Colors from '../constants/Colors';
@@ -18,42 +18,52 @@ export default function Material3Switch({ value, onValueChange, disabled = false
   const animValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
   useEffect(() => {
-    Animated.timing(animValue, {
+    Animated.spring(animValue, {
       toValue: value ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false, // color interpolation requires false
+      useNativeDriver: false, // Color interpolation requires false
+      bounciness: 4,
+      speed: 14,
     }).start();
   }, [value, animValue]);
 
-  // Interpolations
+  // Interpolations matching exact M3 specs
   const trackBackgroundColor = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [colors.surfaceVariant, colors.primaryContainer]
+    outputRange: [colors.surfaceVariant, colors.primary]
   });
 
   const trackBorderColor = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [colors.outline, colors.primaryContainer]
+    outputRange: [colors.outline, colors.primary]
   });
 
+  // Track is 52px wide, border is 2px. Inner width = 48px.
+  // Thumb is fixed at 24px wide for layout, but scales down to 16px.
+  // Unchecked center should be 16px from outer edge (14px from inner edge). Left = 14 - 12 = 2.
+  // Checked center should be 36px from outer edge (34px from inner edge). Left = 34 - 12 = 22.
   const thumbTranslateX = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [4, 24] // Track width 52, Thumb max 24. 52 - 24 - 4 = 24.
+    outputRange: [2, 22] 
   });
 
-  const thumbSize = animValue.interpolate({
+  const thumbScale = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [16, 24]
+    outputRange: [16 / 24, 1]
   });
 
   const thumbColor = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [colors.outline, colors.onPrimaryContainer]
+    outputRange: [colors.outline, colors.onPrimary]
   });
 
   const iconOpacity = animValue.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 1]
+  });
+
+  const iconScale = animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.2, 1]
   });
 
   return (
@@ -72,20 +82,20 @@ export default function Material3Switch({ value, onValueChange, disabled = false
         }
       ]}>
         <Animated.View style={[
-          styles.thumbContainer,
-          { transform: [{ translateX: thumbTranslateX }] }
+          styles.thumb,
+          {
+            backgroundColor: thumbColor,
+            transform: [
+              { translateX: thumbTranslateX },
+              { scale: thumbScale }
+            ]
+          }
         ]}>
-          <Animated.View style={[
-            styles.thumb,
-            {
-              width: thumbSize,
-              height: thumbSize,
-              backgroundColor: thumbColor,
-            }
-          ]}>
-            <Animated.View style={{ opacity: iconOpacity }}>
-              {value && <MaterialIcons name="check" size={16} color={colors.primaryContainer} />}
-            </Animated.View>
+          <Animated.View style={{ 
+            opacity: iconOpacity, 
+            transform: [{ scale: iconScale }] 
+          }}>
+            <MaterialIcons name="check" size={16} color={colors.primary} />
           </Animated.View>
         </Animated.View>
       </Animated.View>
@@ -101,17 +111,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     justifyContent: 'center',
   },
-  thumbContainer: {
+  thumb: {
     width: 24,
     height: 24,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
     left: 0,
-  },
-  thumb: {
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
   }
 });

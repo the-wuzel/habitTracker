@@ -8,21 +8,9 @@ import { Habit, HabitOption } from '../../types/habit';
 import { useColorScheme } from '../../components/useColorScheme';
 
 export default function ManageHabitsScreen() {
-  const { habits, addHabit, updateHabit, deleteHabit, loadMockData, enableLateralFlexibility, toggleLateralFlexibility, themeMode, setThemeMode, compactMode, toggleCompactMode } = useHabitStore();
+  const { habits, addHabit, updateHabit, deleteHabit, enableLateralFlexibility } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
-
-  const cycleTheme = () => {
-    if (themeMode === 'system') setThemeMode('light');
-    else if (themeMode === 'light') setThemeMode('dark');
-    else setThemeMode('system');
-  };
-
-  const getThemeIcon = () => {
-    if (themeMode === 'light') return 'light-mode';
-    if (themeMode === 'dark') return 'dark-mode';
-    return 'brightness-auto';
-  };
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
@@ -173,48 +161,6 @@ export default function ManageHabitsScreen() {
       >
         <View style={styles.header}>
           <Text style={[styles.headerText, { color: colors.text }]}>Manage Habits</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <TouchableOpacity 
-              style={{ padding: 6, backgroundColor: colors.surfaceVariant, borderRadius: 20 }}
-              onPress={cycleTheme}
-            >
-              <MaterialIcons name={getThemeIcon() as any} size={20} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.mockBtn, { backgroundColor: colors.primaryContainer }]} 
-              onPress={() => {
-                Alert.alert('Load Mock Data', 'This will delete all current habits and logs. Are you sure?', [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Load Data', onPress: loadMockData }
-                ]);
-              }}
-            >
-              <Text style={{ color: colors.onPrimaryContainer, fontSize: 12, fontWeight: '500' }}>Mock</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.settingsRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={{ color: colors.text, fontSize: 14 }}>Lateral Flexibility</Text>
-            <Switch 
-              value={enableLateralFlexibility} 
-              onValueChange={toggleLateralFlexibility}
-              trackColor={{ false: colors.surfaceVariant, true: colors.primaryContainer }}
-              thumbColor={enableLateralFlexibility ? colors.primary : colors.secondary}
-              style={{ transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }] }}
-            />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={{ color: colors.text, fontSize: 14 }}>Compact Mode</Text>
-            <Switch 
-              value={compactMode} 
-              onValueChange={toggleCompactMode}
-              trackColor={{ false: colors.surfaceVariant, true: colors.primaryContainer }}
-              thumbColor={compactMode ? colors.primary : colors.secondary}
-              style={{ transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }] }}
-            />
-          </View>
         </View>
 
         {isCreating ? (
@@ -403,18 +349,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
-  },
-  settingsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingHorizontal: 4,
-  },
-  mockBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
   },
   headerText: {
     fontSize: 24,

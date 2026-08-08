@@ -71,7 +71,7 @@ export default function SettingsScreen() {
           
           <View style={styles.divider} />
           
-          <View style={styles.settingRow}>
+          <TouchableOpacity style={styles.settingRow} onPress={toggleCompactMode}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="view-compact" size={24} color={colors.text} style={styles.settingIcon} />
               <View>
@@ -85,7 +85,7 @@ export default function SettingsScreen() {
               value={compactMode} 
               onValueChange={toggleCompactMode}
             />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -94,7 +94,7 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: colors.primary }]}>Features</Text>
         
         <View style={[styles.card, { backgroundColor: colors.elevation.level1 }]}>
-          <View style={styles.settingRow}>
+          <TouchableOpacity style={styles.settingRow} onPress={toggleLateralFlexibility}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="alt-route" size={24} color={colors.text} style={styles.settingIcon} />
               <View style={styles.textContainer}>
@@ -108,7 +108,7 @@ export default function SettingsScreen() {
               value={enableLateralFlexibility} 
               onValueChange={toggleLateralFlexibility}
             />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 

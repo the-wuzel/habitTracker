@@ -142,53 +142,6 @@ export default function AnalyticsScreen() {
         <Text style={[styles.scoreSubtitle, { color: colors.text }]}>Points earned across all habits</Text>
       </View>
 
-      <View style={[styles.infoCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
-        <View style={styles.infoHeader}>
-          <MaterialIcons name="info-outline" size={20} color={colors.primary} />
-          <Text style={styles.infoTitle}>How Points Work</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={styles.infoBadge}><Text style={styles.infoBadgeText}>Mini</Text></View>
-          <Text style={styles.infoDesc}>= 1 Point (Easy, minimal effort)</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={styles.infoBadge}><Text style={styles.infoBadgeText}>Plus</Text></View>
-          <Text style={styles.infoDesc}>= 2 Points (Moderate effort)</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={styles.infoBadge}><Text style={styles.infoBadgeText}>Elite</Text></View>
-          <Text style={styles.infoDesc}>= 3 Points (Significant effort)</Text>
-        </View>
-
-        <View style={[styles.infoHeader, { marginTop: 16 }]}>
-          <MaterialIcons name="star" size={20} color="#FF9800" />
-          <Text style={styles.infoTitle}>Bonuses</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+2 Pts</Text></View>
-          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Perfect Day: Elite win for all habits</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+3 Pts</Text></View>
-          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Hot Streak: 3 consecutive Elite wins</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+5 Pts</Text></View>
-          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Unfreakinbelievable: 7 consecutive Elite wins</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+20 Pts</Text></View>
-          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Habit Master: 15-day streak (Consistency!)</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+3 Pts</Text></View>
-          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Specialist: 10 Elite wins for one habit</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+3 Pts</Text></View>
-          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Big Hitter: 15 Elite wins across habits</Text>
-        </View>
-      </View>
 
       {habitStats.length > 0 && periodProgress.length > 0 && (
         <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Breakdown & Progress</Text>
@@ -287,6 +240,55 @@ export default function AnalyticsScreen() {
           <Text style={[styles.emptyText, { color: colors.outline }]}>No habits to track yet.</Text>
         </View>
       )}
+
+      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Scoring Guide</Text>
+      <View style={[styles.infoCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
+        <View style={styles.infoHeader}>
+          <MaterialIcons name="info-outline" size={20} color={colors.primary} />
+          <Text style={styles.infoTitle}>How Points Work</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={styles.infoBadge}><Text style={styles.infoBadgeText}>Mini</Text></View>
+          <Text style={styles.infoDesc}>= 1 Point (Easy, minimal effort)</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={styles.infoBadge}><Text style={styles.infoBadgeText}>Plus</Text></View>
+          <Text style={styles.infoDesc}>= 2 Points (Moderate effort)</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={styles.infoBadge}><Text style={styles.infoBadgeText}>Elite</Text></View>
+          <Text style={styles.infoDesc}>= 3 Points (Significant effort)</Text>
+        </View>
+
+        <View style={[styles.infoHeader, { marginTop: 16 }]}>
+          <MaterialIcons name="star" size={20} color="#FF9800" />
+          <Text style={styles.infoTitle}>Bonuses</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+2 Pts</Text></View>
+          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Perfect Day: Elite win for all habits</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+3 Pts</Text></View>
+          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Hot Streak: 3 consecutive Elite wins</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+5 Pts</Text></View>
+          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Unfreakinbelievable: 7 consecutive Elite wins</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+20 Pts</Text></View>
+          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Habit Master: 15-day streak (Consistency!)</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+3 Pts</Text></View>
+          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Specialist: 10 Elite wins for one habit</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <View style={[styles.infoBadge, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}><Text style={[styles.infoBadgeText, { color: '#FF9800' }]}>+3 Pts</Text></View>
+          <Text style={[styles.infoDesc, { flex: 1 }]} numberOfLines={2}>Big Hitter: 15 Elite wins across habits</Text>
+        </View>
+      </View>
 
     </ScrollView>
   );

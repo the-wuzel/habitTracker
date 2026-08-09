@@ -1,6 +1,6 @@
 import { Text } from '@/components/Themed';
 import { useColorScheme } from '@/components/useColorScheme';
-import Colors from '@/constants/Colors';
+import Colors, { HabitColors } from '@/constants/Colors';
 import { useHabitStore } from '@/store/habitStore';
 import { HabitLevel } from '@/types/habit';
 import { calculatePeriodStats } from '@/utils/score';
@@ -151,7 +151,9 @@ export default function AnalyticsScreen() {
         <View style={[styles.statCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
           
           <View style={{ gap: 8 }}>
-            {periodProgress.map((pp, index) => (
+            {periodProgress.map((pp, index) => {
+              const habitColorPalette = HabitColors[pp.habit.color || 'purple']?.[colorScheme] || HabitColors.purple[colorScheme];
+              return (
               <View key={`grid-${index}`} style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={{ fontSize: 11, fontWeight: '600', width: 65, marginRight: 8, color: colors.text }} numberOfLines={1}>
                   {pp.habit.name}
@@ -164,16 +166,16 @@ export default function AnalyticsScreen() {
                     let borderColor = colors.outline;
 
                     if (day.level === HabitLevel.Mini) {
-                      initial = 'M'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                      initial = 'M'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                     } else if (day.level === HabitLevel.Plus) {
-                      initial = 'P'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                      initial = 'P'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                     } else if (day.level === HabitLevel.Elite) {
-                      initial = 'E'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                      initial = 'E'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                     }
                     
                     const isToday = day.date === currentDate;
                     if (isToday) {
-                      borderColor = colors.primary;
+                      borderColor = habitColorPalette.primary;
                     }
 
                     return (
@@ -184,12 +186,14 @@ export default function AnalyticsScreen() {
                   })}
                 </View>
               </View>
-            ))}
+              );
+            })}
           </View>
 
           <View style={{ marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.outlineVariant }}>
             {periodProgress.map((pp, index) => {
               const stat = habitStats.find(s => s.name === pp.habit.name);
+              const habitColorPalette = HabitColors[pp.habit.color || 'purple']?.[colorScheme] || HabitColors.purple[colorScheme];
               return (
                 <View key={`counts-${index}`} style={{ flexDirection: 'column', gap: 6, marginBottom: index === periodProgress.length - 1 ? 0 : 16 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -213,7 +217,7 @@ export default function AnalyticsScreen() {
                     <Text style={[styles.countText, { color: colors.text }]}>Mini: {pp.counts.mini}</Text>
                     <Text style={[styles.countText, { color: colors.text }]}>Plus: {pp.counts.plus}</Text>
                     <Text style={[styles.countText, { color: colors.text }]}>Elite: {pp.counts.elite}</Text>
-                    <Text style={[styles.countText, { color: colors.primary, fontWeight: 'bold' }]}>Total: {pp.counts.total}</Text>
+                    <Text style={[styles.countText, { color: habitColorPalette.primary, fontWeight: 'bold' }]}>Total: {pp.counts.total}</Text>
                   </View>
                 </View>
               );

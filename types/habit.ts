@@ -20,6 +20,7 @@ export interface Habit {
   plusGoal: string; // Kept for backwards compatibility
   eliteGoal: string; // Kept for backwards compatibility
   options?: HabitOption[];
+  color?: string; // Predefined M3 palette ID (e.g., 'purple', 'red')
   createdAt: number;
 }
 

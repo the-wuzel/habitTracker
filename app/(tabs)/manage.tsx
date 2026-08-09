@@ -1,8 +1,8 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, Switch, Modal } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, Switch, Modal, ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import Colors from '../../constants/Colors';
+import Colors, { HabitColors } from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';
 import { Habit, HabitOption } from '../../types/habit';
 import { useColorScheme } from '../../components/useColorScheme';
@@ -17,6 +17,7 @@ export default function ManageHabitsScreen() {
   const [habitToDelete, setHabitToDelete] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedColor, setSelectedColor] = useState('purple');
   
   const defaultOption = () => ({ id: Date.now().toString(), name: 'Default Option', miniGoal: '', plusGoal: '', eliteGoal: '' });
   const [options, setOptions] = useState<HabitOption[]>([defaultOption()]);
@@ -25,6 +26,7 @@ export default function ManageHabitsScreen() {
     setEditingHabit(habit);
     setName(habit.name);
     setDescription(habit.description);
+    setSelectedColor(habit.color || 'purple');
     
     if (habit.options && habit.options.length > 0) {
       setOptions(habit.options);
@@ -69,7 +71,8 @@ export default function ManageHabitsScreen() {
           miniGoal: opt.miniGoal.trim(),
           plusGoal: opt.plusGoal.trim(),
           eliteGoal: opt.eliteGoal.trim(),
-        }))
+        })),
+        color: selectedColor
       });
     } else {
       addHabit({
@@ -84,7 +87,8 @@ export default function ManageHabitsScreen() {
           miniGoal: opt.miniGoal.trim(),
           plusGoal: opt.plusGoal.trim(),
           eliteGoal: opt.eliteGoal.trim(),
-        }))
+        })),
+        color: selectedColor
       });
     }
 
@@ -94,6 +98,7 @@ export default function ManageHabitsScreen() {
   const handleCancel = () => {
     setName('');
     setDescription('');
+    setSelectedColor('purple');
     setOptions([defaultOption()]);
     setIsCreating(false);
     setEditingHabit(null);
@@ -185,6 +190,29 @@ export default function ManageHabitsScreen() {
               onChangeText={setDescription}
             />
 
+            <View style={styles.colorPickerContainer}>
+              <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 8 }]}>Habit Color</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.colorPickerRow}>
+                {Object.keys(HabitColors).map(colorKey => {
+                  const palette = HabitColors[colorKey][colorScheme];
+                  const isSelected = selectedColor === colorKey;
+                  return (
+                    <TouchableOpacity
+                      key={colorKey}
+                      style={[
+                        styles.colorSwatch,
+                        { backgroundColor: palette.primary },
+                        isSelected && { borderWidth: 2, borderColor: colors.text, transform: [{ scale: 1.1 }] }
+                      ]}
+                      onPress={() => setSelectedColor(colorKey)}
+                    >
+                      {isSelected && <MaterialIcons name="check" size={20} color={palette.onPrimary} />}
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
             {enableLateralFlexibility && (
               <View style={styles.optionsHeader}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>Lateral Options</Text>
@@ -269,8 +297,10 @@ export default function ManageHabitsScreen() {
             ) : (
               habits.map(habit => {
                 const displayOpt = habit.options && habit.options.length > 0 ? habit.options[0] : habit;
+                const habitColorPalette = HabitColors[habit.color || 'purple']?.[colorScheme] || HabitColors.purple[colorScheme];
+                
                 return (
-                  <View key={habit.id} style={[styles.habitItem, { backgroundColor: colors.elevation.level1 }]}>
+                  <View key={habit.id} style={[styles.habitItem, { backgroundColor: colors.elevation.level1, borderLeftWidth: 4, borderLeftColor: habitColorPalette.primary }]}>
                     <View style={styles.habitItemInfo}>
                       <Text style={[styles.habitItemName, { color: colors.text }]}>{habit.name}</Text>
                       {enableLateralFlexibility && habit.options && habit.options.length > 1 ? (
@@ -379,6 +409,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 12,
+  },
+  colorPickerContainer: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  colorPickerRow: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingVertical: 4,
+  },
+  colorSwatch: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   optionContainer: {
     borderWidth: 1,

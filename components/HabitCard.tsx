@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, TouchableWithoutFeedback } from 'react-native';
-import Colors from '../constants/Colors';
+import Colors, { HabitColors } from '../constants/Colors';
 import { useHabitStore } from '../store/habitStore';
 import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';
 import { useColorScheme } from './useColorScheme';
@@ -19,6 +19,8 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   const { enableLateralFlexibility, compactMode } = useHabitStore();
+
+  const habitColorPalette = HabitColors[habit.color || 'purple']?.[colorScheme] || HabitColors.purple[colorScheme];
 
   const hasOptions = enableLateralFlexibility && habit.options && habit.options.length > 1;
   const defaultOption = habit.options && habit.options.length > 0 ? habit.options[0] : (habit as unknown as HabitOption);
@@ -83,8 +85,8 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                           style={[
                             styles.optionChip,
                             { borderColor: colors.outlineVariant },
-                            isSelected && { backgroundColor: colors.primaryContainer, borderColor: colors.primaryContainer },
-                            isCompleted && !isSelected && { borderColor: colors.primaryContainer, borderWidth: 1.5 },
+                            isSelected && { backgroundColor: habitColorPalette.primaryContainer, borderColor: habitColorPalette.primaryContainer },
+                            isCompleted && !isSelected && { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 },
                           ]}
                           onPress={() => setSelectedOptionId(opt.id)}
                         >
@@ -92,8 +94,8 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                             style={[
                               styles.optionChipText, 
                               { color: colors.outline },
-                              isSelected && { color: colors.onPrimaryContainer },
-                              isCompleted && !isSelected && { color: colors.onPrimaryContainer, fontWeight: 'bold' },
+                              isSelected && { color: habitColorPalette.onPrimaryContainer },
+                              isCompleted && !isSelected && { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' },
                             ]}
                           >
                             {opt.name}
@@ -112,16 +114,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       style={[
                         dayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
                         dayLog.optionId === selectedOptionId 
-                          ? { backgroundColor: colors.primaryContainer } 
-                          : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
+                          ? { backgroundColor: habitColorPalette.primaryContainer } 
+                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
                       <Text style={[
                         dayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
                         dayLog.optionId === selectedOptionId 
-                          ? { color: colors.onPrimaryContainer }
-                          : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
+                          ? { color: habitColorPalette.onPrimaryContainer }
+                          : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                       ]}>Mini</Text>
                     </TouchableOpacity>
                   ) : (
@@ -129,7 +131,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         styles.buttonOutline, 
                         { borderColor: colors.outlineVariant }
                       ]} onPress={() => onLogHabit(habit.id, HabitLevel.Mini, undefined, hasOptions ? selectedOptionId : undefined, selectedHistoryDate)}>
-                      <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Mini</Text>
+                      <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Mini</Text>
                     </TouchableOpacity>
                   )}
                   <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.miniGoal}</Text>
@@ -141,16 +143,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       style={[
                         dayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
                         dayLog.optionId === selectedOptionId 
-                          ? { backgroundColor: colors.primaryContainer } 
-                          : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
+                          ? { backgroundColor: habitColorPalette.primaryContainer } 
+                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
                       <Text style={[
                         dayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
                         dayLog.optionId === selectedOptionId 
-                          ? { color: colors.onPrimaryContainer }
-                          : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
+                          ? { color: habitColorPalette.onPrimaryContainer }
+                          : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                       ]}>Plus</Text>
                     </TouchableOpacity>
                   ) : (
@@ -158,7 +160,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         styles.buttonOutline, 
                         { borderColor: colors.outlineVariant }
                       ]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus, undefined, hasOptions ? selectedOptionId : undefined, selectedHistoryDate)}>
-                      <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Plus</Text>
+                      <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Plus</Text>
                     </TouchableOpacity>
                   )}
                   <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.plusGoal}</Text>
@@ -170,16 +172,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       style={[
                         dayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
                         dayLog.optionId === selectedOptionId 
-                          ? { backgroundColor: colors.primaryContainer } 
-                          : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
+                          ? { backgroundColor: habitColorPalette.primaryContainer } 
+                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
                       <Text style={[
                         dayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
                         dayLog.optionId === selectedOptionId 
-                          ? { color: colors.onPrimaryContainer }
-                          : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
+                          ? { color: habitColorPalette.onPrimaryContainer }
+                          : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                       ]}>Elite</Text>
                     </TouchableOpacity>
                   ) : (
@@ -187,7 +189,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         styles.buttonOutline, 
                         { borderColor: colors.outlineVariant }
                       ]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite, undefined, hasOptions ? selectedOptionId : undefined, selectedHistoryDate)}>
-                      <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Elite</Text>
+                      <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Elite</Text>
                     </TouchableOpacity>
                   )}
                   <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
@@ -217,11 +219,11 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   const isTodayStr = new Date().toISOString().split('T')[0] === day.date;
 
                   if (day.level === HabitLevel.Mini) {
-                    initial = 'M'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                    initial = 'M'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                   } else if (day.level === HabitLevel.Plus) {
-                    initial = 'P'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                    initial = 'P'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                   } else if (day.level === HabitLevel.Elite) {
-                    initial = 'E'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                    initial = 'E'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                   }
                   
                   return (
@@ -232,7 +234,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         styles.historyCircle, 
                         { width: 24, height: 24, borderRadius: 12 },
                         { backgroundColor: bgColor, borderColor },
-                        isTodayStr && { borderWidth: 2, borderColor: colors.primary }
+                        isTodayStr && { borderWidth: 2, borderColor: habitColorPalette.primary }
                       ]}
                     >
                       <Text style={[
@@ -286,8 +288,8 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       style={[
                         styles.optionChip,
                         { borderColor: colors.outlineVariant },
-                        isSelected && { backgroundColor: colors.primaryContainer, borderColor: colors.primaryContainer },
-                        isCompleted && !isSelected && { borderColor: colors.primaryContainer, borderWidth: 1.5 },
+                        isSelected && { backgroundColor: habitColorPalette.primaryContainer, borderColor: habitColorPalette.primaryContainer },
+                        isCompleted && !isSelected && { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 },
                       ]}
                       onPress={() => setSelectedOptionId(opt.id)}
                     >
@@ -295,8 +297,8 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       style={[
                         styles.optionChipText, 
                         { color: colors.outline },
-                        isSelected && { color: colors.onPrimaryContainer },
-                        isCompleted && !isSelected && { color: colors.onPrimaryContainer, fontWeight: 'bold' },
+                        isSelected && { color: habitColorPalette.onPrimaryContainer },
+                        isCompleted && !isSelected && { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' },
                       ]}
                     >
                       {opt.name}
@@ -315,16 +317,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   style={[
                     todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
                     todayLog.optionId === selectedOptionId 
-                      ? { backgroundColor: colors.primaryContainer } 
-                      : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
+                      ? { backgroundColor: habitColorPalette.primaryContainer } 
+                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
                     todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
                     todayLog.optionId === selectedOptionId 
-                      ? { color: colors.onPrimaryContainer }
-                      : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
+                      ? { color: habitColorPalette.onPrimaryContainer }
+                      : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
                     Mini
                   </Text>
@@ -334,7 +336,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                     styles.buttonOutline, 
                     { borderColor: colors.outlineVariant }
                   ]} onPress={() => handleLogHabit(HabitLevel.Mini)}>
-                  <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Mini</Text>
+                  <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Mini</Text>
                 </TouchableOpacity>
               )}
               <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.miniGoal}</Text>
@@ -346,16 +348,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   style={[
                     todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
                     todayLog.optionId === selectedOptionId 
-                      ? { backgroundColor: colors.primaryContainer } 
-                      : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
+                      ? { backgroundColor: habitColorPalette.primaryContainer } 
+                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
                     todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
                     todayLog.optionId === selectedOptionId 
-                      ? { color: colors.onPrimaryContainer }
-                      : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
+                      ? { color: habitColorPalette.onPrimaryContainer }
+                      : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
                     Plus
                   </Text>
@@ -365,7 +367,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                     styles.buttonOutline, 
                     { borderColor: colors.outlineVariant }
                   ]} onPress={() => handleLogHabit(HabitLevel.Plus)}>
-                  <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Plus</Text>
+                  <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Plus</Text>
                 </TouchableOpacity>
               )}
               <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.plusGoal}</Text>
@@ -377,16 +379,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   style={[
                     todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
                     todayLog.optionId === selectedOptionId 
-                      ? { backgroundColor: colors.primaryContainer } 
-                      : { borderColor: colors.primaryContainer, borderWidth: 1.5 }
+                      ? { backgroundColor: habitColorPalette.primaryContainer } 
+                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
                     todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
                     todayLog.optionId === selectedOptionId 
-                      ? { color: colors.onPrimaryContainer }
-                      : { color: colors.onPrimaryContainer, fontWeight: 'bold' }
+                      ? { color: habitColorPalette.onPrimaryContainer }
+                      : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
                     Elite
                   </Text>
@@ -396,7 +398,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                     styles.buttonOutline, 
                     { borderColor: colors.outlineVariant }
                   ]} onPress={() => handleLogHabit(HabitLevel.Elite)}>
-                  <Text style={[styles.buttonOutlineText, { color: colors.primary }]}>Elite</Text>
+                  <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Elite</Text>
                 </TouchableOpacity>
               )}
               <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
@@ -412,11 +414,11 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                 let borderColor = colors.outline;
 
                 if (day.level === HabitLevel.Mini) {
-                  initial = 'M'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                  initial = 'M'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                 } else if (day.level === HabitLevel.Plus) {
-                  initial = 'P'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                  initial = 'P'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                 } else if (day.level === HabitLevel.Elite) {
-                  initial = 'E'; bgColor = colors.primaryContainer; textColor = colors.onPrimaryContainer; borderColor = colors.primaryContainer;
+                  initial = 'E'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                 }
                 
                 return (

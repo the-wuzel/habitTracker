@@ -69,6 +69,12 @@ export const initializeDatabase = () => {
   } catch (e) {
     // Column might already exist
   }
+  
+  try {
+    db.execSync('ALTER TABLE habits ADD COLUMN hasVerticalFlexibility INTEGER DEFAULT 1;');
+  } catch (e) {
+    // Column might already exist
+  }
 };
 
 export const seedDatabase = () => {
@@ -111,8 +117,8 @@ export const seedDatabase = () => {
     
     for (const habit of habits) {
       db.runSync(
-        'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, color, orderIndex) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.color || 'purple', 0]
+        'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, color, orderIndex, hasVerticalFlexibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.color || 'purple', 0, 1]
       );
     }
   }
@@ -123,23 +129,24 @@ export const getHabits = (): Habit[] => {
   const rows = db.getAllSync<any>('SELECT * FROM habits ORDER BY orderIndex ASC, createdAt DESC');
   return rows.map(row => ({
     ...row,
-    options: row.options ? JSON.parse(row.options) : []
+    options: row.options ? JSON.parse(row.options) : [],
+    hasVerticalFlexibility: row.hasVerticalFlexibility !== 0
   }));
 };
 
 export const addHabit = (habit: Habit) => {
   const db = getDb();
   db.runSync(
-    'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, options, color, orderIndex) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple', habit.orderIndex || 0]
+    'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, options, color, orderIndex, hasVerticalFlexibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple', habit.orderIndex || 0, habit.hasVerticalFlexibility === false ? 0 : 1]
   );
 };
 
 export const updateHabit = (habit: Habit) => {
   const db = getDb();
   db.runSync(
-    'UPDATE habits SET name = ?, description = ?, miniGoal = ?, plusGoal = ?, eliteGoal = ?, options = ?, color = ?, orderIndex = ? WHERE id = ?',
-    [habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple', habit.orderIndex || 0, habit.id]
+    'UPDATE habits SET name = ?, description = ?, miniGoal = ?, plusGoal = ?, eliteGoal = ?, options = ?, color = ?, orderIndex = ?, hasVerticalFlexibility = ? WHERE id = ?',
+    [habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple', habit.orderIndex || 0, habit.hasVerticalFlexibility === false ? 0 : 1, habit.id]
   );
 };
 

@@ -1,10 +1,10 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import { Text } from './Themed';
 import Colors, { HabitColors } from '../constants/Colors';
 import { useHabitStore } from '../store/habitStore';
 import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';
+import { Text } from './Themed';
 import { useColorScheme } from './useColorScheme';
 
 interface HabitCardProps {
@@ -19,7 +19,7 @@ interface HabitCardProps {
 export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [], onLogHabit, onRemoveLog }: HabitCardProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
-  const { enableLateralFlexibility, compactMode } = useHabitStore();
+  const { enableLateralFlexibility, compactMode, currentDate } = useHabitStore();
 
   const habitColorPalette = HabitColors[habit.color || 'purple']?.[colorScheme] || HabitColors.purple[colorScheme];
 
@@ -141,63 +141,67 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.miniGoal}</Text>
                 </View>
 
-                <View style={styles.buttonColumn}>
-                  {dayLog?.level === HabitLevel.Plus ? (
-                    <TouchableOpacity 
-                      style={[
-                        isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
-                        isDayLogActive 
-                          ? { backgroundColor: habitColorPalette.primaryContainer } 
-                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
-                      ]} 
-                      onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
-                    >
-                      <Text style={[
-                        isDayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
-                        isDayLogActive 
-                          ? { color: habitColorPalette.onPrimaryContainer }
-                          : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
-                      ]}>Plus</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity style={[
-                        styles.buttonOutline, 
-                        { borderColor: colors.outlineVariant }
-                      ]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus, undefined, hasOptions ? selectedOptionId : undefined, selectedHistoryDate)}>
-                      <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Plus</Text>
-                    </TouchableOpacity>
-                  )}
-                  <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.plusGoal}</Text>
-                </View>
+                {habit.hasVerticalFlexibility !== false && (
+                  <View style={styles.buttonColumn}>
+                    {dayLog?.level === HabitLevel.Plus ? (
+                      <TouchableOpacity 
+                        style={[
+                          isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                          isDayLogActive 
+                            ? { backgroundColor: habitColorPalette.primaryContainer } 
+                            : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
+                        ]} 
+                        onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
+                      >
+                        <Text style={[
+                          isDayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                          isDayLogActive 
+                            ? { color: habitColorPalette.onPrimaryContainer }
+                            : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
+                        ]}>Plus</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity style={[
+                          styles.buttonOutline, 
+                          { borderColor: colors.outlineVariant }
+                        ]} onPress={() => onLogHabit(habit.id, HabitLevel.Plus, undefined, hasOptions ? selectedOptionId : undefined, selectedHistoryDate)}>
+                        <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Plus</Text>
+                      </TouchableOpacity>
+                    )}
+                    <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.plusGoal}</Text>
+                  </View>
+                )}
 
-                <View style={styles.buttonColumn}>
-                  {dayLog?.level === HabitLevel.Elite ? (
-                    <TouchableOpacity 
-                      style={[
-                        isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
-                        isDayLogActive 
-                          ? { backgroundColor: habitColorPalette.primaryContainer } 
-                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
-                      ]} 
-                      onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
-                    >
-                      <Text style={[
-                        isDayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
-                        isDayLogActive 
-                          ? { color: habitColorPalette.onPrimaryContainer }
-                          : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
-                      ]}>Elite</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity style={[
-                        styles.buttonOutline, 
-                        { borderColor: colors.outlineVariant }
-                      ]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite, undefined, hasOptions ? selectedOptionId : undefined, selectedHistoryDate)}>
-                      <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Elite</Text>
-                    </TouchableOpacity>
-                  )}
-                  <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
-                </View>
+                {habit.hasVerticalFlexibility !== false && (
+                  <View style={styles.buttonColumn}>
+                    {dayLog?.level === HabitLevel.Elite ? (
+                      <TouchableOpacity 
+                        style={[
+                          isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                          isDayLogActive 
+                            ? { backgroundColor: habitColorPalette.primaryContainer } 
+                            : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
+                        ]} 
+                        onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
+                      >
+                        <Text style={[
+                          isDayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                          isDayLogActive 
+                            ? { color: habitColorPalette.onPrimaryContainer }
+                            : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
+                        ]}>Elite</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity style={[
+                          styles.buttonOutline, 
+                          { borderColor: colors.outlineVariant }
+                        ]} onPress={() => onLogHabit(habit.id, HabitLevel.Elite, undefined, hasOptions ? selectedOptionId : undefined, selectedHistoryDate)}>
+                        <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Elite</Text>
+                      </TouchableOpacity>
+                    )}
+                    <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
+                  </View>
+                )}
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -220,10 +224,10 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   let bgColor = 'transparent';
                   let textColor = colors.outline;
                   let borderColor = colors.outline;
-                  const isTodayStr = new Date().toISOString().split('T')[0] === day.date;
+                  const isTodayStr = currentDate === day.date;
 
                   if (day.level === HabitLevel.Mini) {
-                    initial = 'M'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
+                    initial = habit.hasVerticalFlexibility !== false ? 'M' : '✓'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                   } else if (day.level === HabitLevel.Plus) {
                     initial = 'P'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                   } else if (day.level === HabitLevel.Elite) {
@@ -231,22 +235,24 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   }
                   
                   return (
-                    <TouchableOpacity 
-                      key={idx} 
-                      onPress={() => setSelectedHistoryDate(day.date)}
-                      style={[
-                        styles.historyCircle, 
-                        { width: 24, height: 24, borderRadius: 12 },
-                        { backgroundColor: bgColor, borderColor },
-                        isTodayStr && { borderWidth: 2, borderColor: habitColorPalette.primary }
-                      ]}
-                    >
-                      <Text style={[
-                        styles.historyText, 
-                        { fontSize: 10 },
-                        { color: textColor }
-                      ]}>{initial}</Text>
-                    </TouchableOpacity>
+                    <View key={idx} style={{ alignItems: 'center', gap: 2 }}>
+                      <Text style={{ fontSize: 8, color: colors.outline }}>{day.date.split('-')[2]}</Text>
+                      <TouchableOpacity 
+                        onPress={() => setSelectedHistoryDate(day.date)}
+                        style={[
+                          styles.historyCircle, 
+                          { width: 24, height: 24, borderRadius: 12 },
+                          { backgroundColor: bgColor, borderColor },
+                          isTodayStr && { borderWidth: 2, borderColor: habitColorPalette.primary }
+                        ]}
+                      >
+                        <Text style={[
+                          styles.historyText, 
+                          { fontSize: 10 },
+                          { color: textColor }
+                        ]}>{initial}</Text>
+                      </TouchableOpacity>
+                    </View>
                   );
                 })}
               </View>
@@ -332,7 +338,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                       ? { color: habitColorPalette.onPrimaryContainer }
                       : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
-                    Mini
+                  Mini 
                   </Text>
                 </TouchableOpacity>
               ) : (
@@ -346,67 +352,71 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.miniGoal}</Text>
             </View>
             
-            <View style={styles.buttonColumn}>
-              {todayLog?.level === HabitLevel.Plus ? (
-                <TouchableOpacity 
-                  style={[
-                    isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
-                    isTodayLogActive 
-                      ? { backgroundColor: habitColorPalette.primaryContainer } 
-                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
-                  ]} 
-                  onPress={() => onRemoveLog(habit.id)}
-                >
-                  <Text style={[
-                    isTodayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
-                    isTodayLogActive 
-                      ? { color: habitColorPalette.onPrimaryContainer }
-                      : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
-                  ]}>
-                    Plus
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={[
-                    styles.buttonOutline, 
-                    { borderColor: colors.outlineVariant }
-                  ]} onPress={() => handleLogHabit(HabitLevel.Plus)}>
-                  <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Plus</Text>
-                </TouchableOpacity>
-              )}
-              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.plusGoal}</Text>
-            </View>
+            {habit.hasVerticalFlexibility !== false && (
+              <View style={styles.buttonColumn}>
+                {todayLog?.level === HabitLevel.Plus ? (
+                  <TouchableOpacity 
+                    style={[
+                      isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                      isTodayLogActive 
+                        ? { backgroundColor: habitColorPalette.primaryContainer } 
+                        : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
+                    ]} 
+                    onPress={() => onRemoveLog(habit.id)}
+                  >
+                    <Text style={[
+                      isTodayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                      isTodayLogActive 
+                        ? { color: habitColorPalette.onPrimaryContainer }
+                        : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
+                    ]}>
+                      Plus
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity style={[
+                      styles.buttonOutline, 
+                      { borderColor: colors.outlineVariant }
+                    ]} onPress={() => handleLogHabit(HabitLevel.Plus)}>
+                    <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Plus</Text>
+                  </TouchableOpacity>
+                )}
+                <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.plusGoal}</Text>
+              </View>
+            )}
             
-            <View style={styles.buttonColumn}>
-              {todayLog?.level === HabitLevel.Elite ? (
-                <TouchableOpacity 
-                  style={[
-                    isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
-                    isTodayLogActive 
-                      ? { backgroundColor: habitColorPalette.primaryContainer } 
-                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
-                  ]} 
-                  onPress={() => onRemoveLog(habit.id)}
-                >
-                  <Text style={[
-                    isTodayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
-                    isTodayLogActive 
-                      ? { color: habitColorPalette.onPrimaryContainer }
-                      : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
-                  ]}>
-                    Elite
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={[
-                    styles.buttonOutline, 
-                    { borderColor: colors.outlineVariant }
-                  ]} onPress={() => handleLogHabit(HabitLevel.Elite)}>
-                  <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Elite</Text>
-                </TouchableOpacity>
-              )}
-              <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
-            </View>
+            {habit.hasVerticalFlexibility !== false && (
+              <View style={styles.buttonColumn}>
+                {todayLog?.level === HabitLevel.Elite ? (
+                  <TouchableOpacity 
+                    style={[
+                      isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                      isTodayLogActive 
+                        ? { backgroundColor: habitColorPalette.primaryContainer } 
+                        : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
+                    ]} 
+                    onPress={() => onRemoveLog(habit.id)}
+                  >
+                    <Text style={[
+                      isTodayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                      isTodayLogActive 
+                        ? { color: habitColorPalette.onPrimaryContainer }
+                        : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
+                    ]}>
+                      Elite
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity style={[
+                      styles.buttonOutline, 
+                      { borderColor: colors.outlineVariant }
+                    ]} onPress={() => handleLogHabit(HabitLevel.Elite)}>
+                    <Text style={[styles.buttonOutlineText, { color: habitColorPalette.primary }]}>Elite</Text>
+                  </TouchableOpacity>
+                )}
+                <Text style={[styles.goalText, { color: colors.secondary }]} numberOfLines={2} ellipsizeMode="tail">{currentOption.eliteGoal}</Text>
+              </View>
+            )}
           </View>
           
           {last7Days.length > 0 && (
@@ -416,9 +426,10 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                 let bgColor = 'transparent';
                 let textColor = colors.outline;
                 let borderColor = colors.outline;
+                const isTodayStr = currentDate === day.date;
 
                 if (day.level === HabitLevel.Mini) {
-                  initial = 'M'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
+                  initial = habit.hasVerticalFlexibility !== false ? 'M' : '✓'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                 } else if (day.level === HabitLevel.Plus) {
                   initial = 'P'; bgColor = habitColorPalette.primaryContainer; textColor = habitColorPalette.onPrimaryContainer; borderColor = habitColorPalette.primaryContainer;
                 } else if (day.level === HabitLevel.Elite) {
@@ -426,14 +437,18 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                 }
                 
                 return (
-                  <View key={idx} style={[
-                    styles.historyCircle, 
-                    { backgroundColor: bgColor, borderColor }
-                  ]}>
-                    <Text style={[
-                      styles.historyText, 
-                      { color: textColor }
-                    ]}>{initial}</Text>
+                  <View key={idx} style={{ alignItems: 'center', gap: 4 }}>
+                    <Text style={{ fontSize: 10, color: colors.outline }}>{day.date.split('-')[2]}</Text>
+                    <View style={[
+                      styles.historyCircle, 
+                      { backgroundColor: bgColor, borderColor },
+                      isTodayStr && { borderWidth: 2, borderColor: habitColorPalette.primary }
+                    ]}>
+                      <Text style={[
+                        styles.historyText, 
+                        { color: textColor }
+                      ]}>{initial}</Text>
+                    </View>
                   </View>
                 );
               })}

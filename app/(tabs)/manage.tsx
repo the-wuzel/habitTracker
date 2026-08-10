@@ -19,6 +19,7 @@ export default function ManageHabitsScreen() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedColor, setSelectedColor] = useState('purple');
+  const [hasVerticalFlexibility, setHasVerticalFlexibility] = useState(true);
   
   const defaultOption = () => ({ id: Date.now().toString(), name: 'Default Option', miniGoal: '', plusGoal: '', eliteGoal: '' });
   const [options, setOptions] = useState<HabitOption[]>([defaultOption()]);
@@ -28,6 +29,7 @@ export default function ManageHabitsScreen() {
     setName(habit.name);
     setDescription(habit.description);
     setSelectedColor(habit.color || 'purple');
+    setHasVerticalFlexibility(habit.hasVerticalFlexibility !== false);
     
     if (habit.options && habit.options.length > 0) {
       setOptions(habit.options);
@@ -49,7 +51,10 @@ export default function ManageHabitsScreen() {
       return;
     }
 
-    const invalidOption = options.find(opt => !opt.miniGoal.trim() || !opt.plusGoal.trim() || !opt.eliteGoal.trim());
+    const invalidOption = options.find(opt => 
+      !opt.miniGoal.trim() || 
+      (hasVerticalFlexibility && (!opt.plusGoal.trim() || !opt.eliteGoal.trim()))
+    );
     if (invalidOption) {
       Alert.alert('Validation', 'Please fill in all goal fields for all options.');
       return;
@@ -64,32 +69,34 @@ export default function ManageHabitsScreen() {
         name: name.trim(),
         description: description.trim(),
         miniGoal: defaultOpt.miniGoal.trim(),
-        plusGoal: defaultOpt.plusGoal.trim(),
-        eliteGoal: defaultOpt.eliteGoal.trim(),
+        plusGoal: hasVerticalFlexibility ? defaultOpt.plusGoal.trim() : defaultOpt.miniGoal.trim(),
+        eliteGoal: hasVerticalFlexibility ? defaultOpt.eliteGoal.trim() : defaultOpt.miniGoal.trim(),
         options: options.map(opt => ({
           ...opt,
           name: opt.name.trim(),
           miniGoal: opt.miniGoal.trim(),
-          plusGoal: opt.plusGoal.trim(),
-          eliteGoal: opt.eliteGoal.trim(),
+          plusGoal: hasVerticalFlexibility ? opt.plusGoal.trim() : opt.miniGoal.trim(),
+          eliteGoal: hasVerticalFlexibility ? opt.eliteGoal.trim() : opt.miniGoal.trim(),
         })),
-        color: selectedColor
+        color: selectedColor,
+        hasVerticalFlexibility
       });
     } else {
       addHabit({
         name: name.trim(),
         description: description.trim(),
         miniGoal: defaultOpt.miniGoal.trim(),
-        plusGoal: defaultOpt.plusGoal.trim(),
-        eliteGoal: defaultOpt.eliteGoal.trim(),
+        plusGoal: hasVerticalFlexibility ? defaultOpt.plusGoal.trim() : defaultOpt.miniGoal.trim(),
+        eliteGoal: hasVerticalFlexibility ? defaultOpt.eliteGoal.trim() : defaultOpt.miniGoal.trim(),
         options: options.map(opt => ({
           ...opt,
           name: opt.name.trim(),
           miniGoal: opt.miniGoal.trim(),
-          plusGoal: opt.plusGoal.trim(),
-          eliteGoal: opt.eliteGoal.trim(),
+          plusGoal: hasVerticalFlexibility ? opt.plusGoal.trim() : opt.miniGoal.trim(),
+          eliteGoal: hasVerticalFlexibility ? opt.eliteGoal.trim() : opt.miniGoal.trim(),
         })),
-        color: selectedColor
+        color: selectedColor,
+        hasVerticalFlexibility
       });
     }
 
@@ -100,6 +107,7 @@ export default function ManageHabitsScreen() {
     setName('');
     setDescription('');
     setSelectedColor('purple');
+    setHasVerticalFlexibility(true);
     setOptions([defaultOption()]);
     setIsCreating(false);
     setEditingHabit(null);
@@ -226,6 +234,19 @@ export default function ManageHabitsScreen() {
               </ScrollView>
             </View>
 
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 16 }}>
+              <View style={{ flex: 1, paddingRight: 16 }}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Vertical Flexibility</Text>
+                <Text style={{ fontSize: 12, color: colors.secondary, marginTop: 2 }}>Enable Mini and Elite goal levels</Text>
+              </View>
+              <Switch 
+                value={hasVerticalFlexibility} 
+                onValueChange={setHasVerticalFlexibility}
+                trackColor={{ false: colors.outlineVariant, true: colors.primaryContainer }}
+                thumbColor={hasVerticalFlexibility ? colors.primary : colors.outline}
+              />
+            </View>
+
             {enableLateralFlexibility && (
               <View style={styles.optionsHeader}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>Lateral Options</Text>
@@ -269,27 +290,31 @@ export default function ManageHabitsScreen() {
 
                 <TextInput
                   style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface, marginTop: enableLateralFlexibility ? 8 : 0 }]}
-                  placeholder="Mini Goal (e.g. 1 Pushup)"
+                  placeholder={hasVerticalFlexibility ? "Mini Goal (e.g. 1 Pushup)" : "Goal (e.g. 15 Pushups)"}
                   placeholderTextColor={colors.outline}
                   value={option.miniGoal}
                   onChangeText={(val) => updateOption(idx, 'miniGoal', val)}
                 />
                 
-                <TextInput
-                  style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
-                  placeholder="Plus Goal (e.g. 15 Pushups)"
-                  placeholderTextColor={colors.outline}
-                  value={option.plusGoal}
-                  onChangeText={(val) => updateOption(idx, 'plusGoal', val)}
-                />
+                {hasVerticalFlexibility && (
+                  <TextInput
+                    style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
+                    placeholder="Plus Goal (e.g. 15 Pushups)"
+                    placeholderTextColor={colors.outline}
+                    value={option.plusGoal}
+                    onChangeText={(val) => updateOption(idx, 'plusGoal', val)}
+                  />
+                )}
                 
-                <TextInput
-                  style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
-                  placeholder="Elite Goal (e.g. 30 Pushups)"
-                  placeholderTextColor={colors.outline}
-                  value={option.eliteGoal}
-                  onChangeText={(val) => updateOption(idx, 'eliteGoal', val)}
-                />
+                {hasVerticalFlexibility && (
+                  <TextInput
+                    style={[styles.input, { color: colors.text, borderColor: colors.outline, backgroundColor: colors.surface }]}
+                    placeholder="Elite Goal (e.g. 30 Pushups)"
+                    placeholderTextColor={colors.outline}
+                    value={option.eliteGoal}
+                    onChangeText={(val) => updateOption(idx, 'eliteGoal', val)}
+                  />
+                )}
               </View>
               );
             })}
@@ -322,7 +347,10 @@ export default function ManageHabitsScreen() {
                         </Text>
                       ) : (
                         <Text style={{ color: colors.secondary, fontSize: 12, marginTop: 4 }}>
-                          M: {displayOpt.miniGoal} | P: {displayOpt.plusGoal} | E: {displayOpt.eliteGoal}
+                          {habit.hasVerticalFlexibility !== false 
+                            ? `M: ${displayOpt.miniGoal} | P: ${displayOpt.plusGoal} | E: ${displayOpt.eliteGoal}`
+                            : `Goal: ${displayOpt.miniGoal}`
+                          }
                         </Text>
                       )}
                     </View>

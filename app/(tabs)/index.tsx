@@ -120,6 +120,17 @@ export default function TabOneScreen() {
     if (statsAfter.bonusCounts.bigHitter > statsBefore.bonusCounts.bigHitter) newlyAchieved.push({ title: 'Big Hitter', description: '15 Elite wins across habits' });
     if (statsAfter.bonusCounts.perfectDay > statsBefore.bonusCounts.perfectDay) newlyAchieved.push({ title: 'Perfect Day', description: 'Elite win for all habits' });
 
+    const logsBeforeToday = periodLogsBefore.filter(l => l.date === targetDate);
+    const logsAfterToday = periodLogsAfter.filter(l => l.date === targetDate);
+    if (habits.length > 0 && logsBeforeToday.length === habits.length - 1 && logsAfterToday.length === habits.length) {
+      // If this doesn't already trigger a Perfect Day (which implies all habits), 
+      // or even if it does, adding this is a nice explicit celebration!
+      const hasPerfectDay = statsAfter.bonusCounts.perfectDay > statsBefore.bonusCounts.perfectDay;
+      if (!hasPerfectDay) {
+        newlyAchieved.push({ title: 'All Done!', description: 'Completed all habits for the day' });
+      }
+    }
+
     if (newlyAchieved.length > 0) {
       setRecentBonuses(newlyAchieved);
     }
@@ -199,8 +210,9 @@ export default function TabOneScreen() {
             
             const last7Days = [];
             for (let i = 6; i >= 0; i--) {
-              const d = new Date();
-              d.setDate(d.getDate() - i);
+              const [year, month, day] = currentDate.split('-');
+              const d = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+              d.setUTCDate(d.getUTCDate() - i);
               const dateStr = d.toISOString().split('T')[0];
               const logForDay = hLogs.find(l => l.date === dateStr);
               last7Days.push({

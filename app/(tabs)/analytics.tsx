@@ -151,6 +151,17 @@ export default function AnalyticsScreen() {
         <View style={[styles.statCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
           
           <View style={{ gap: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <View style={{ width: 65, marginRight: 8 }} />
+              <View style={[styles.progressRow, { paddingBottom: 0, flex: 1 }]}>
+                {periodProgress[0].progress.map((day, idx) => (
+                  <View key={idx} style={{ width: 15, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 9, color: colors.outline }}>{day.date.split('-')[2]}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            
             {periodProgress.map((pp, index) => {
               const habitColorPalette = HabitColors[pp.habit.color || 'purple']?.[colorScheme] || HabitColors.purple[colorScheme];
               return (

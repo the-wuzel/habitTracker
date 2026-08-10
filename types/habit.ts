@@ -22,6 +22,7 @@ export interface Habit {
   options?: HabitOption[];
   color?: string; // Predefined M3 palette ID (e.g., 'purple', 'red')
   createdAt: number;
+  orderIndex?: number;
 }
 
 export interface HabitLog {

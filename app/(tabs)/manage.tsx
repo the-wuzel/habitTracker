@@ -9,7 +9,7 @@ import { Habit, HabitOption } from '../../types/habit';
 import { useColorScheme } from '../../components/useColorScheme';
 
 export default function ManageHabitsScreen() {
-  const { habits, addHabit, updateHabit, deleteHabit, enableLateralFlexibility } = useHabitStore();
+  const { habits, addHabit, updateHabit, deleteHabit, enableLateralFlexibility, updateHabitsOrder } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
@@ -156,6 +156,18 @@ export default function ManageHabitsScreen() {
     setOptions(newOptions);
   };
 
+  const moveHabit = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === habits.length - 1) return;
+    
+    const newHabits = [...habits];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    const temp = newHabits[targetIndex];
+    newHabits[targetIndex] = newHabits[index];
+    newHabits[index] = temp;
+    updateHabitsOrder(newHabits);
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <KeyboardAwareScrollView 
@@ -296,7 +308,7 @@ export default function ManageHabitsScreen() {
             {habits.length === 0 ? (
               <Text style={{ color: colors.secondary, textAlign: 'center', marginTop: 24 }}>No habits found.</Text>
             ) : (
-              habits.map(habit => {
+              habits.map((habit, idx) => {
                 const displayOpt = habit.options && habit.options.length > 0 ? habit.options[0] : habit;
                 const habitColorPalette = HabitColors[habit.color || 'purple']?.[colorScheme] || HabitColors.purple[colorScheme];
                 
@@ -315,6 +327,14 @@ export default function ManageHabitsScreen() {
                       )}
                     </View>
                     <View style={styles.habitItemActions}>
+                      <View style={{ flexDirection: 'column', marginRight: 8, gap: 4 }}>
+                        <TouchableOpacity onPress={() => moveHabit(idx, 'up')} disabled={idx === 0} style={{ padding: 4, opacity: idx === 0 ? 0.3 : 1 }}>
+                          <MaterialIcons name="arrow-upward" size={20} color={colors.text} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => moveHabit(idx, 'down')} disabled={idx === habits.length - 1} style={{ padding: 4, opacity: idx === habits.length - 1 ? 0.3 : 1 }}>
+                          <MaterialIcons name="arrow-downward" size={20} color={colors.text} />
+                        </TouchableOpacity>
+                      </View>
                       <TouchableOpacity onPress={() => handleEdit(habit)} style={{ padding: 8 }}>
                         <MaterialIcons name="edit" color={colors.primary} size={24} />
                       </TouchableOpacity>

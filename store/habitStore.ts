@@ -29,6 +29,7 @@ interface HabitState {
   setThemeMode: (mode: 'system' | 'light' | 'dark') => void;
   toggleCompactMode: () => void;
   setAppFontSize: (size: 'small' | 'medium' | 'large') => void;
+  updateHabitsOrder: (orderedHabits: Habit[]) => void;
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -145,6 +146,24 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({ habits: getHabits() });
     } catch (error) {
       console.error('Failed to update habit:', error);
+    }
+  },
+
+  updateHabitsOrder: (orderedHabits: Habit[]) => {
+    try {
+      // Reassign orderIndex based on the provided array
+      const updatedHabits = orderedHabits.map((habit, index) => ({
+        ...habit,
+        orderIndex: index
+      }));
+      
+      updatedHabits.forEach(habit => {
+        updateHabit(habit);
+      });
+      
+      set({ habits: getHabits() });
+    } catch (error) {
+      console.error('Failed to update habits order:', error);
     }
   },
 

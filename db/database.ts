@@ -26,7 +26,8 @@ export const initializeDatabase = () => {
       miniGoal TEXT NOT NULL,
       plusGoal TEXT NOT NULL,
       eliteGoal TEXT NOT NULL,
-      createdAt INTEGER NOT NULL
+      createdAt INTEGER NOT NULL,
+      orderIndex INTEGER DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS habit_logs (
@@ -59,6 +60,12 @@ export const initializeDatabase = () => {
   
   try {
     db.execSync('ALTER TABLE habits ADD COLUMN color TEXT;');
+  } catch (e) {
+    // Column might already exist
+  }
+  
+  try {
+    db.execSync('ALTER TABLE habits ADD COLUMN orderIndex INTEGER DEFAULT 0;');
   } catch (e) {
     // Column might already exist
   }
@@ -104,8 +111,8 @@ export const seedDatabase = () => {
     
     for (const habit of habits) {
       db.runSync(
-        'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.color || 'purple']
+        'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, color, orderIndex) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.color || 'purple', 0]
       );
     }
   }
@@ -113,7 +120,7 @@ export const seedDatabase = () => {
 
 export const getHabits = (): Habit[] => {
   const db = getDb();
-  const rows = db.getAllSync<any>('SELECT * FROM habits ORDER BY createdAt DESC');
+  const rows = db.getAllSync<any>('SELECT * FROM habits ORDER BY orderIndex ASC, createdAt DESC');
   return rows.map(row => ({
     ...row,
     options: row.options ? JSON.parse(row.options) : []
@@ -123,16 +130,16 @@ export const getHabits = (): Habit[] => {
 export const addHabit = (habit: Habit) => {
   const db = getDb();
   db.runSync(
-    'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, options, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple']
+    'INSERT INTO habits (id, name, description, miniGoal, plusGoal, eliteGoal, createdAt, options, color, orderIndex) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [habit.id, habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.createdAt, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple', habit.orderIndex || 0]
   );
 };
 
 export const updateHabit = (habit: Habit) => {
   const db = getDb();
   db.runSync(
-    'UPDATE habits SET name = ?, description = ?, miniGoal = ?, plusGoal = ?, eliteGoal = ?, options = ?, color = ? WHERE id = ?',
-    [habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple', habit.id]
+    'UPDATE habits SET name = ?, description = ?, miniGoal = ?, plusGoal = ?, eliteGoal = ?, options = ?, color = ?, orderIndex = ? WHERE id = ?',
+    [habit.name, habit.description, habit.miniGoal, habit.plusGoal, habit.eliteGoal, habit.options ? JSON.stringify(habit.options) : null, habit.color || 'purple', habit.orderIndex || 0, habit.id]
   );
 };
 

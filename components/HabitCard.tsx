@@ -52,6 +52,8 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
     ? habit.options!.find(o => o.id === selectedOptionId) || habit.options![0]
     : defaultOption;
 
+  const isTodayLogActive = !hasOptions || todayLog?.optionId === selectedOptionId;
+
   const handleLogHabit = (level: HabitLevel) => {
     onLogHabit(habit.id, level, undefined, hasOptions ? selectedOptionId : undefined);
   };
@@ -61,6 +63,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
     
     const dayData = last7Days.find(d => d.date === selectedHistoryDate);
     const dayLog = dayData?.log;
+    const isDayLogActive = !hasOptions || dayLog?.optionId === selectedOptionId;
     
     return (
       <Modal visible={true} transparent={true} animationType="fade" onRequestClose={() => setSelectedHistoryDate(null)}>
@@ -112,16 +115,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   {dayLog?.level === HabitLevel.Mini ? (
                     <TouchableOpacity 
                       style={[
-                        dayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
-                        dayLog.optionId === selectedOptionId 
+                        isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                        isDayLogActive 
                           ? { backgroundColor: habitColorPalette.primaryContainer } 
                           : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
                       <Text style={[
-                        dayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
-                        dayLog.optionId === selectedOptionId 
+                        isDayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                        isDayLogActive 
                           ? { color: habitColorPalette.onPrimaryContainer }
                           : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                       ]}>Mini</Text>
@@ -141,16 +144,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   {dayLog?.level === HabitLevel.Plus ? (
                     <TouchableOpacity 
                       style={[
-                        dayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
-                        dayLog.optionId === selectedOptionId 
+                        isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                        isDayLogActive 
                           ? { backgroundColor: habitColorPalette.primaryContainer } 
                           : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
                       <Text style={[
-                        dayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
-                        dayLog.optionId === selectedOptionId 
+                        isDayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                        isDayLogActive 
                           ? { color: habitColorPalette.onPrimaryContainer }
                           : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                       ]}>Plus</Text>
@@ -170,16 +173,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                   {dayLog?.level === HabitLevel.Elite ? (
                     <TouchableOpacity 
                       style={[
-                        dayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
-                        dayLog.optionId === selectedOptionId 
+                        isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                        isDayLogActive 
                           ? { backgroundColor: habitColorPalette.primaryContainer } 
                           : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
                       <Text style={[
-                        dayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
-                        dayLog.optionId === selectedOptionId 
+                        isDayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                        isDayLogActive 
                           ? { color: habitColorPalette.onPrimaryContainer }
                           : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                       ]}>Elite</Text>
@@ -315,16 +318,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               {todayLog?.level === HabitLevel.Mini ? (
                 <TouchableOpacity 
                   style={[
-                    todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
-                    todayLog.optionId === selectedOptionId 
+                    isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                    isTodayLogActive 
                       ? { backgroundColor: habitColorPalette.primaryContainer } 
                       : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
-                    todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
-                    todayLog.optionId === selectedOptionId 
+                    isTodayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                    isTodayLogActive 
                       ? { color: habitColorPalette.onPrimaryContainer }
                       : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
@@ -346,16 +349,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               {todayLog?.level === HabitLevel.Plus ? (
                 <TouchableOpacity 
                   style={[
-                    todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
-                    todayLog.optionId === selectedOptionId 
+                    isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                    isTodayLogActive 
                       ? { backgroundColor: habitColorPalette.primaryContainer } 
                       : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
-                    todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
-                    todayLog.optionId === selectedOptionId 
+                    isTodayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                    isTodayLogActive 
                       ? { color: habitColorPalette.onPrimaryContainer }
                       : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>
@@ -377,16 +380,16 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
               {todayLog?.level === HabitLevel.Elite ? (
                 <TouchableOpacity 
                   style={[
-                    todayLog.optionId === selectedOptionId ? styles.buttonActive : styles.buttonOutline, 
-                    todayLog.optionId === selectedOptionId 
+                    isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
+                    isTodayLogActive 
                       ? { backgroundColor: habitColorPalette.primaryContainer } 
                       : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
                   <Text style={[
-                    todayLog.optionId === selectedOptionId ? styles.buttonActiveText : styles.buttonOutlineText, 
-                    todayLog.optionId === selectedOptionId 
+                    isTodayLogActive ? styles.buttonActiveText : styles.buttonOutlineText, 
+                    isTodayLogActive 
                       ? { color: habitColorPalette.onPrimaryContainer }
                       : { color: habitColorPalette.onPrimaryContainer, fontWeight: 'bold' }
                   ]}>

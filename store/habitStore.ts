@@ -12,6 +12,7 @@ interface HabitState {
   hasCompletedOnboarding: boolean;
   themeMode: 'system' | 'light' | 'dark';
   compactMode: boolean;
+  appFontSize: 'small' | 'medium' | 'large';
   
   // Actions
   init: () => void;
@@ -27,6 +28,7 @@ interface HabitState {
   toggleLateralFlexibility: () => void;
   setThemeMode: (mode: 'system' | 'light' | 'dark') => void;
   toggleCompactMode: () => void;
+  setAppFontSize: (size: 'small' | 'medium' | 'large') => void;
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -39,6 +41,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   hasCompletedOnboarding: true, // Will be overridden in init
   themeMode: 'system',
   compactMode: false,
+  appFontSize: 'medium',
   
   init: () => {
     try {
@@ -52,8 +55,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const hasCompletedOnboarding = getSetting('hasCompletedOnboarding', 'false') === 'true';
       const themeMode = getSetting('themeMode', 'system') as 'system' | 'light' | 'dark';
       const compactMode = getSetting('compactMode', 'false') === 'true';
+      const appFontSize = getSetting('appFontSize', 'medium') as 'small' | 'medium' | 'large';
       
-      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility, hasCompletedOnboarding, themeMode, compactMode });
+      set({ habits, todayLogs, allLogs, isLoading: false, enableLateralFlexibility, hasCompletedOnboarding, themeMode, compactMode, appFontSize });
     } catch (error) {
       console.error('Failed to initialize database:', error);
       set({ isLoading: false });
@@ -282,6 +286,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({ compactMode: newValue });
     } catch (error) {
       console.error('Failed to toggle compact mode setting:', error);
+    }
+  },
+  
+  setAppFontSize: (size: 'small' | 'medium' | 'large') => {
+    try {
+      setSetting('appFontSize', size);
+      set({ appFontSize: size });
+    } catch (error) {
+      console.error('Failed to save font size setting:', error);
     }
   }
 }));

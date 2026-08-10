@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, Animated, Pressable } from 'react-native';
+import { View, StyleSheet, Animated, Pressable } from 'react-native';
+import { Text } from './Themed';
 import { MaterialIcons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 import { useColorScheme } from './useColorScheme';

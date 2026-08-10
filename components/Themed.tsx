@@ -2,9 +2,10 @@
  * Learn more about Light and Dark modes:
  * https://docs.expo.io/guides/color-schemes/
  */
-import { Text as DefaultText, View as DefaultView } from 'react-native';
+import { Text as DefaultText, View as DefaultView, StyleSheet } from 'react-native';
 
 import { useColorScheme } from './useColorScheme';
+import { useHabitStore } from '@/store/habitStore';
 
 import Colors from '@/constants/Colors';
 
@@ -33,8 +34,15 @@ export function useThemeColor(
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  
+  const { appFontSize } = useHabitStore();
+  const scale = appFontSize === 'small' ? 0.85 : appFontSize === 'large' ? 1.15 : 1.0;
+  
+  const flatStyle = StyleSheet.flatten(style) || {};
+  // If fontSize is defined in style, scale it. Otherwise use a default (14) * scale
+  const fontSize = flatStyle.fontSize ? flatStyle.fontSize * scale : 14 * scale;
 
-  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+  return <DefaultText style={[{ color }, style, { fontSize }]} {...otherProps} />;
 }
 
 export function View(props: ViewProps) {

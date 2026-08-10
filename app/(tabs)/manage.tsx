@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, Switch, Modal, ScrollView } from 'react-native';
+import { Alert, StyleSheet, TextInput, TouchableOpacity, View, Platform, Switch, Modal, ScrollView } from 'react-native';
+import { Text } from '../../components/Themed';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Colors, { HabitColors } from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';

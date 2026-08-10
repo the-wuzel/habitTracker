@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Text } from '../../components/Themed';
 import Colors from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';
 import { useColorScheme } from '../../components/useColorScheme';
@@ -11,7 +12,8 @@ export default function SettingsScreen() {
     themeMode, setThemeMode, 
     compactMode, toggleCompactMode, 
     enableLateralFlexibility, toggleLateralFlexibility, 
-    loadMockData 
+    loadMockData,
+    appFontSize, setAppFontSize 
   } = useHabitStore();
   
   const colorScheme = useColorScheme() ?? 'light';
@@ -25,6 +27,7 @@ export default function SettingsScreen() {
   };
 
   const themes = ['system', 'light', 'dark'] as const;
+  const fontSizes = ['small', 'medium', 'large'] as const;
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.container}>
@@ -64,6 +67,40 @@ export default function SettingsScreen() {
                   { color: themeMode === theme ? colors.onPrimaryContainer : colors.text }
                 ]}>
                   {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          
+          <View style={styles.divider} />
+          
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <MaterialIcons name="text-fields" size={24} color={colors.text} style={styles.settingIcon} />
+              <View>
+                <Text style={[styles.settingTitle, { color: colors.text }]}>Font Size</Text>
+                <Text style={[styles.settingDescription, { color: colors.secondary }]}>
+                  Adjust the overall text size
+                </Text>
+              </View>
+            </View>
+          </View>
+          
+          <View style={[styles.segmentedControl, { backgroundColor: colors.surfaceVariant }]}>
+            {fontSizes.map((size) => (
+              <TouchableOpacity
+                key={size}
+                style={[
+                  styles.segment,
+                  appFontSize === size && { backgroundColor: colors.primaryContainer }
+                ]}
+                onPress={() => setAppFontSize(size)}
+              >
+                <Text style={[
+                  styles.segmentText,
+                  { color: appFontSize === size ? colors.onPrimaryContainer : colors.text }
+                ]}>
+                  {size.charAt(0).toUpperCase() + size.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}

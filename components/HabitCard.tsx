@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Text } from './Themed';
 import Colors, { HabitColors } from '../constants/Colors';
 import { useHabitStore } from '../store/habitStore';
 import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';
@@ -89,7 +90,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                             styles.optionChip,
                             { borderColor: colors.outlineVariant },
                             isSelected && { backgroundColor: habitColorPalette.primaryContainer, borderColor: habitColorPalette.primaryContainer },
-                            isCompleted && !isSelected && { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 },
+                            isCompleted && !isSelected && { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 5.5, paddingHorizontal: 11.5 },
                           ]}
                           onPress={() => setSelectedOptionId(opt.id)}
                         >
@@ -118,7 +119,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
                         isDayLogActive 
                           ? { backgroundColor: habitColorPalette.primaryContainer } 
-                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
+                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
@@ -147,7 +148,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
                         isDayLogActive 
                           ? { backgroundColor: habitColorPalette.primaryContainer } 
-                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
+                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
@@ -176,7 +177,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         isDayLogActive ? styles.buttonActive : styles.buttonOutline, 
                         isDayLogActive 
                           ? { backgroundColor: habitColorPalette.primaryContainer } 
-                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
+                          : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
                       ]} 
                       onPress={() => onRemoveLog(habit.id, selectedHistoryDate)}
                     >
@@ -292,7 +293,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                         styles.optionChip,
                         { borderColor: colors.outlineVariant },
                         isSelected && { backgroundColor: habitColorPalette.primaryContainer, borderColor: habitColorPalette.primaryContainer },
-                        isCompleted && !isSelected && { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 },
+                        isCompleted && !isSelected && { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 5.5, paddingHorizontal: 11.5 },
                       ]}
                       onPress={() => setSelectedOptionId(opt.id)}
                     >
@@ -321,7 +322,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                     isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
                     isTodayLogActive 
                       ? { backgroundColor: habitColorPalette.primaryContainer } 
-                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
+                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
@@ -352,7 +353,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                     isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
                     isTodayLogActive 
                       ? { backgroundColor: habitColorPalette.primaryContainer } 
-                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
+                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
@@ -383,7 +384,7 @@ export default function HabitCard({ habit, todayLog, streak = 0, last7Days = [],
                     isTodayLogActive ? styles.buttonActive : styles.buttonOutline, 
                     isTodayLogActive 
                       ? { backgroundColor: habitColorPalette.primaryContainer } 
-                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5 }
+                      : { borderColor: habitColorPalette.primaryContainer, borderWidth: 1.5, paddingVertical: 9.5, paddingHorizontal: 23.5 }
                   ]} 
                   onPress={() => onRemoveLog(habit.id)}
                 >
@@ -513,6 +514,8 @@ const styles = StyleSheet.create({
     borderRadius: 100, // MD3 fully rounded
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   buttonOutline: {
     backgroundColor: 'transparent',

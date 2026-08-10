@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, TouchableWithoutFeedback } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Colors, { HabitColors } from '../constants/Colors';
 import { useHabitStore } from '../store/habitStore';
 import { Habit, HabitLevel, HabitLog, HabitOption } from '../types/habit';

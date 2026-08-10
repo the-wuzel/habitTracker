@@ -3,13 +3,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Colors from '../../constants/Colors';
 
+import { Redirect, useRouter } from 'expo-router';
 import BonusOverlay from '../../components/BonusOverlay';
 import HabitCard from '../../components/HabitCard';
+import { useColorScheme } from '../../components/useColorScheme';
 import { useHabitStore } from '../../store/habitStore';
 import { HabitLevel, HabitLog } from '../../types/habit';
 import { calculatePeriodStats, calculateStreak } from '../../utils/score';
-import { Redirect } from 'expo-router';
-import { useColorScheme } from '../../components/useColorScheme';
 
 const formatHeaderDate = (dateString: string) => {
   const today = new Date().toISOString().split('T')[0];
@@ -38,7 +38,8 @@ const formatHeaderDate = (dateString: string) => {
 };
 
 export default function TabOneScreen() {
-  const { habits, todayLogs, currentDate, isLoading, hasCompletedOnboarding, init, setDate, logHabit, removeLog, allLogs } = useHabitStore();
+  const router = useRouter();
+  const { habits, todayLogs, currentDate, isLoading, hasCompletedOnboarding, init, setDate, logHabit, removeLog, allLogs, compactMode } = useHabitStore();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   const [isSimplifiedView, setIsSimplifiedView] = useState(false);
@@ -163,11 +164,15 @@ export default function TabOneScreen() {
         </View>
 
         {!isSimplifiedView && (
-          <View style={[styles.compactScoreCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}>
+          <TouchableOpacity 
+            style={[styles.compactScoreCard, { backgroundColor: colors.elevation.level1, borderColor: 'transparent' }]}
+            onPress={() => router.push('/analytics')}
+            activeOpacity={0.7}
+          >
             <MaterialIcons name="emoji-events" size={24} color={colors.primary} />
             <Text style={[styles.compactScoreText, { color: colors.text }]}>Total Elastic Score:</Text>
             <Text style={[styles.compactScoreValue, { color: colors.primary }]}>{periodScore}</Text>
-          </View>
+          </TouchableOpacity>
         )}
         
         {currentDate.endsWith('-31') && (
@@ -210,7 +215,7 @@ export default function TabOneScreen() {
                 habit={habit}
                 todayLog={todayLog}
                 streak={isSimplifiedView ? 0 : streak}
-                last7Days={isSimplifiedView ? [] : last7Days}
+                last7Days={isSimplifiedView && !compactMode ? [] : last7Days}
                 onLogHabit={handleLogHabit}
                 onRemoveLog={removeLog}
               />

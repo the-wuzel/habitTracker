@@ -1,26 +1,57 @@
 import { Link, Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof MaterialIcons>['name'];
+  focused: boolean;
+  color: string;
+  colors: any;
+}) {
+  return (
+    <View style={{ alignItems: 'center', justifyContent: 'center', width: 64, height: 32, marginBottom: 4 }}>
+      {props.focused && (
+        <View
+          style={{
+            position: 'absolute',
+            backgroundColor: props.colors.primaryContainer,
+            width: 64,
+            height: 32,
+            borderRadius: 16,
+          }}
+        />
+      )}
+      <MaterialIcons
+        name={props.name}
+        size={26}
+        color={props.focused ? props.colors.onPrimaryContainer : props.color}
+        style={{ zIndex: 1 }}
+      />
+    </View>
+  );
+}
+
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.tint,
+        tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.outline,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopWidth: 0,
           elevation: 8,
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
         },
         headerStyle: {
@@ -41,8 +72,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Track',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="check-circle" color={color} size={28} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="check-circle" color={color} focused={focused} colors={colors} />
           ),
           headerRight: () => (
             <Link href="/modal" asChild>
@@ -64,8 +95,8 @@ export default function TabLayout() {
         name="manage"
         options={{
           title: 'Manage',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="format-list-bulleted" color={color} size={28} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="format-list-bulleted" color={color} focused={focused} colors={colors} />
           ),
         }}
       />
@@ -73,8 +104,8 @@ export default function TabLayout() {
         name="analytics"
         options={{
           title: 'Analytics',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="bar-chart" color={color} size={28} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="bar-chart" color={color} focused={focused} colors={colors} />
           ),
         }}
       />
@@ -82,8 +113,8 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="settings" color={color} size={28} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="settings" color={color} focused={focused} colors={colors} />
           ),
         }}
       />

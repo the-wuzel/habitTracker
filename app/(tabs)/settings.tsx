@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Alert, Platform, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Text } from '../../components/Themed';
 import Colors from '../../constants/Colors';
 import { useHabitStore } from '../../store/habitStore';
@@ -20,6 +20,12 @@ export default function SettingsScreen() {
   const colors = Colors[colorScheme];
 
   const handleMockData = () => {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm('This will delete all current habits and logs. Are you sure?')) {
+        loadMockData();
+      }
+      return;
+    }
     Alert.alert('Load Mock Data', 'This will delete all current habits and logs. Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Load Data', onPress: loadMockData }
@@ -108,7 +114,11 @@ export default function SettingsScreen() {
           
           <View style={styles.divider} />
           
-          <TouchableOpacity style={styles.settingRow} onPress={toggleCompactMode}>
+          <TouchableOpacity 
+            style={styles.settingRow} 
+            onPress={toggleCompactMode}
+            activeOpacity={0.7}
+          >
             <View style={styles.settingInfo}>
               <MaterialIcons name="view-compact" size={24} color={colors.text} style={styles.settingIcon} />
               <View>
@@ -118,10 +128,12 @@ export default function SettingsScreen() {
                 </Text>
               </View>
             </View>
-            <Material3Switch 
-              value={compactMode} 
-              onValueChange={toggleCompactMode}
-            />
+            <View pointerEvents="none">
+              <Material3Switch 
+                value={compactMode} 
+                onValueChange={toggleCompactMode}
+              />
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -131,7 +143,11 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: colors.primary }]}>Features</Text>
         
         <View style={[styles.card, { backgroundColor: colors.elevation.level1 }]}>
-          <TouchableOpacity style={styles.settingRow} onPress={toggleLateralFlexibility}>
+          <TouchableOpacity 
+            style={styles.settingRow} 
+            onPress={toggleLateralFlexibility}
+            activeOpacity={0.7}
+          >
             <View style={styles.settingInfo}>
               <MaterialIcons name="alt-route" size={24} color={colors.text} style={styles.settingIcon} />
               <View style={styles.textContainer}>
@@ -141,10 +157,12 @@ export default function SettingsScreen() {
                 </Text>
               </View>
             </View>
-            <Material3Switch 
-              value={enableLateralFlexibility} 
-              onValueChange={toggleLateralFlexibility}
-            />
+            <View pointerEvents="none">
+              <Material3Switch 
+                value={enableLateralFlexibility} 
+                onValueChange={toggleLateralFlexibility}
+              />
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -154,7 +172,11 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: colors.primary }]}>Data</Text>
         
         <View style={[styles.card, { backgroundColor: colors.elevation.level1 }]}>
-          <TouchableOpacity style={styles.settingRow} onPress={handleMockData}>
+          <TouchableOpacity 
+            style={styles.settingRow} 
+            onPress={handleMockData}
+            activeOpacity={0.7}
+          >
             <View style={styles.settingInfo}>
               <MaterialIcons name="science" size={24} color={colors.text} style={styles.settingIcon} />
               <View>
@@ -214,6 +236,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
+    cursor: Platform.OS === 'web' ? 'pointer' : undefined,
   },
   settingInfo: {
     flexDirection: 'row',
@@ -252,6 +275,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
     borderRadius: 16,
+    cursor: Platform.OS === 'web' ? 'pointer' : undefined,
   },
   segmentText: {
     fontSize: 14,

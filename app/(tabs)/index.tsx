@@ -120,14 +120,10 @@ export default function TabOneScreen() {
     if (statsAfter.bonusCounts.bigHitter > statsBefore.bonusCounts.bigHitter) newlyAchieved.push({ title: 'Big Hitter', description: '15 Elite wins across habits' });
     if (statsAfter.bonusCounts.perfectDay > statsBefore.bonusCounts.perfectDay) newlyAchieved.push({ title: 'Perfect Day', description: 'Elite win for all habits' });
 
-    const logsBeforeToday = periodLogsBefore.filter(l => l.date === targetDate);
-    const logsAfterToday = periodLogsAfter.filter(l => l.date === targetDate);
-    if (habits.length > 0 && logsBeforeToday.length === habits.length - 1 && logsAfterToday.length === habits.length) {
-      // If this doesn't already trigger a Perfect Day (which implies all habits), 
-      // or even if it does, adding this is a nice explicit celebration!
+    if (statsAfter.bonusCounts.completedAllDay > statsBefore.bonusCounts.completedAllDay) {
       const hasPerfectDay = statsAfter.bonusCounts.perfectDay > statsBefore.bonusCounts.perfectDay;
       if (!hasPerfectDay) {
-        newlyAchieved.push({ title: 'All Done!', description: 'Completed all habits for the day' });
+        newlyAchieved.push({ title: 'All Done!', description: 'Completed all habits for the day (+1 pt)' });
       }
     }
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Habit, HabitLog, HabitLevel } from '../types/habit';
-import { getHabits, getHabitLogs, getAllHabitLogs, logHabit, removeHabitLog, initializeDatabase, addHabit, updateHabit, deleteHabit, seedDatabase, getDb, getSetting, setSetting } from '../db/database';
+import { getHabits, getHabitLogs, getAllHabitLogs, logHabit, removeHabitLog, initializeDatabase, addHabit, updateHabit, deleteHabit, seedDatabase, getSetting, setSetting, clearAllDatabaseData } from '../db/database';
 
 interface HabitState {
   habits: Habit[];
@@ -182,9 +182,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
   loadMockData: () => {
     try {
-      const db = getDb();
-      db.runSync('DELETE FROM habits');
-      db.runSync('DELETE FROM habit_logs');
+      clearAllDatabaseData();
       
       const mockHabits: Habit[] = [
         {
@@ -271,27 +269,27 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   toggleLateralFlexibility: () => {
     const current = get().enableLateralFlexibility;
     const newValue = !current;
+    set({ enableLateralFlexibility: newValue });
     try {
       setSetting('enableLateralFlexibility', newValue.toString());
-      set({ enableLateralFlexibility: newValue });
     } catch (error) {
       console.error('Failed to toggle lateral flexibility setting:', error);
     }
   },
   
   completeOnboarding: () => {
+    set({ hasCompletedOnboarding: true });
     try {
       setSetting('hasCompletedOnboarding', 'true');
-      set({ hasCompletedOnboarding: true });
     } catch (error) {
       console.error('Failed to save onboarding state:', error);
     }
   },
   
   setThemeMode: (mode: 'system' | 'light' | 'dark') => {
+    set({ themeMode: mode });
     try {
       setSetting('themeMode', mode);
-      set({ themeMode: mode });
     } catch (error) {
       console.error('Failed to save theme mode:', error);
     }
@@ -300,18 +298,18 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   toggleCompactMode: () => {
     const current = get().compactMode;
     const newValue = !current;
+    set({ compactMode: newValue });
     try {
       setSetting('compactMode', newValue.toString());
-      set({ compactMode: newValue });
     } catch (error) {
       console.error('Failed to toggle compact mode setting:', error);
     }
   },
   
   setAppFontSize: (size: 'small' | 'medium' | 'large') => {
+    set({ appFontSize: size });
     try {
       setSetting('appFontSize', size);
-      set({ appFontSize: size });
     } catch (error) {
       console.error('Failed to save font size setting:', error);
     }

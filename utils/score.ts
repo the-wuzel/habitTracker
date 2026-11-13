@@ -49,6 +49,7 @@ export const calculatePeriodStats = (habits: Habit[], periodLogs: HabitLog[], cu
     habitMaster: 0,
     bigHitter: 0,
     perfectDay: 0,
+    completedAllDay: 0,
   };
 
   habits.forEach(h => {
@@ -127,7 +128,15 @@ export const calculatePeriodStats = (habits: Habit[], periodLogs: HabitLog[], cu
   if (habits.length > 0) {
     const uniqueDates = [...new Set(periodLogs.map(l => l.date))];
     uniqueDates.forEach(date => {
-      const eliteLogsForDate = periodLogs.filter(l => l.date === date && l.level === HabitLevel.Elite);
+      const logsForDate = periodLogs.filter(l => l.date === date);
+      const uniqueHabitsLogged = new Set(logsForDate.map(l => l.habitId)).size;
+      
+      if (uniqueHabitsLogged === habits.length) {
+        score += 1;
+        bonusCounts.completedAllDay++;
+      }
+
+      const eliteLogsForDate = logsForDate.filter(l => l.level === HabitLevel.Elite);
       if (eliteLogsForDate.length === habits.length) {
         score += 2;
         bonusCounts.perfectDay++;

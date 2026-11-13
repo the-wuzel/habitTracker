@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useColorScheme } from './useColorScheme';
 import Colors from '../constants/Colors';
@@ -68,11 +68,14 @@ export default function Material3Switch({ value, onValueChange, disabled = false
 
   return (
     <Pressable 
-      onPress={() => onValueChange(!value)} 
+      onPress={(e: any) => {
+        e?.stopPropagation?.();
+        onValueChange(!value);
+      }} 
       disabled={disabled}
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled }}
-      style={{ opacity: disabled ? 0.5 : 1 }}
+      style={{ opacity: disabled ? 0.5 : 1, cursor: (Platform.OS === 'web' && !disabled) ? 'pointer' : undefined }}
     >
       <Animated.View style={[
         styles.track, 
